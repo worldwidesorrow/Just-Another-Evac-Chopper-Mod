@@ -715,7 +715,7 @@ if (!isNull _cursorTarget && !_inVehicle && !_isPZombie && (player distance _cur
 						s_player_evacChopper set [count s_player_evacChopper,_setEvac];
 						s_player_evacChopper_ctrl = 1;
 					};
-					if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 20)) then {
+					if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
 						_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
 						s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
 						s_player_evacChopper_ctrl = 1;

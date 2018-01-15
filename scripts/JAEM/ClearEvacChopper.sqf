@@ -5,17 +5,11 @@
 /* 01/14/2014                         */
 /* Last update: 06/14/2014            */
 /*------------------------------------*/
+// Updated for DayZ Epoch 1.0.6.2 by JasonTM.
 
 /*Files used as reference to update this file: remove.sqf */
 
 private ["_finished","_isfriendly","_isowner","_nearestPole","_IsNearPlot","_plotcheck","_canRemove","_isOwnerOfObj","_objOwnerID","_obj","_locationPlayer","_objectID","_objectUID","_location1","_location2"];
-
-/*
-player removeAction s_player_clearEvacChopper;
-s_player_clearEvacChopper = 0;
-*/
-
-//_locationPlayer = [player] call fnc_GetPos;
 
 if (dayz_actionInProgress) exitWith {localize "str_player_actionslimit" call dayz_rollingMessages;};
 dayz_actionInProgress = true;
