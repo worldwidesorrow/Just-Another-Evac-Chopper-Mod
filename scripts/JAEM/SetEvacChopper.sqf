@@ -6,10 +6,10 @@
 /* Last update: 06/14/2014            */
 /*------------------------------------*/
 /*
-Files used as reference to update this file: dze_buildChecks.sqf, modular_build.sqf
+Updated for DayZ Epoch 1.0.6.2 with ZSC support by JasonTM
 */
 
-private ["_finished","_sfx","_dis","_location1","_location2","_isowner","_isfriendly","_IsNearPlot","_distance","_plotcheck","_requireplot","_friendlies","_ownerID","_nearestPole","_canBuild","_vector","_allNearRescueFields","_locationPlayer","_cnt","_objID","_targetVehicle","_magazinesPlayer","_hasBriefcase","_location","_dir","_obj"];
+private ["_playerMoney","_finished","_sfx","_dis","_isowner","_isfriendly","_IsNearPlot","_distance","_plotcheck","_requireplot","_friendlies","_ownerID","_nearestPole","_canBuild","_vector","_allNearRescueFields","_locationPlayer","_cnt","_objID","_targetVehicle","_hasBriefcase","_location","_dir","_obj"];
 
 if (dayz_actionInProgress) exitWith {localize "str_player_actionslimit" call dayz_rollingMessages;};
 dayz_actionInProgress = true;
@@ -17,13 +17,14 @@ dayz_actionInProgress = true;
 {player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
 s_player_evacChopper_ctrl = 1;
 
+if (!DZE_permanentPlot) exitWith {"You must have DZE_permanentPlot turned on to use this mod." call dayz_rollingMessages;};
+
 if (player getVariable["combattimeout",0] >= diag_tickTime) exitWith {dayz_actionInProgress = false; localize "str_epoch_player_43" call dayz_rollingMessages;};
 
 //Getting the target Vehicle and needed variables
 _targetVehicle = _this select 3;
 _location = [_targetVehicle] call FNC_GetPos;
 _dir = getDir _targetVehicle;
-_magazinesPlayer = magazines player;
 
 if (!DZE_BuildOnRoads) then {
 		if (isOnRoad _location) exitWith {localize "STR_EPOCH_BUILD_FAIL_ROAD" call dayz_rollingMessages;};
@@ -37,19 +38,21 @@ if ((_location) select 2 >= 3) then {
 	"Sorry but Evac-Choppers need to be built on flat Terrain" call dayz_rollingMessages;
 	"Make sure you dont stand on a Building or a built object!" call dayz_rollingMessages;
 };
-//Check if player has the needed amount of Briefcases to pay for the Evac-Chopper
-//If not exit script
-_hasBriefcase = {_x == "ItemBriefcase100oz"} count _magazinesPlayer;
-if (_hasBriefcase < evac_chopperPrice) exitWith {
-	dayz_actionInProgress = false;
-	format["Making an Evac-Chopper costs %1 Full Briefcases - You dont have it - Sorry!", evac_chopperPrice] call dayz_rollingMessages;
+//Check if player has the needed amount of money to pay for the Evac-Chopper. If not exit script
+if (evac_chopperUseZSC && Z_singleCurrency) then {
+	_playerMoney = player getVariable [Z_MoneyVariable,0];
+	if (_playerMoney < evac_chopperPriceZSC) exitWith {
+		format["Making an Evac-Chopper costs %1 Coins", evac_chopperPriceZSC] call dayz_rollingMessages;
+	};
+} else {	
+	_hasBriefcase = {_x == "ItemBriefcase100oz"} count (magazines player);
+	if (_hasBriefcase < evac_chopperPrice) exitWith {
+		dayz_actionInProgress = false;
+		format["Making an Evac-Chopper costs %1 Full Briefcases", evac_chopperPrice] call dayz_rollingMessages;
+	};
 };
 
-/* ****You should not need this check since it is checked in fn_selfActions.sqf */
-
-//If player already has a Evac-Chopper
-//tell him that only 1 Evac-Chopper is allowed
-//Give him 5 seconds until we change the Evac-Chopper to the current target
+//If player already has an Evac-Chopper tell him that only 1 Evac-Chopper is allowed
 if (playerHasEvacField) exitWith {
 	dayz_actionInProgress = false;
 	"WARNING! You already have an Evac-Chopper" call dayz_rollingMessages;
@@ -102,59 +105,54 @@ if (!_canBuild) exitWith {
 	};
 };
 
-//Start building if build checks pass
-if (_canBuild) then {
+//Before we start the building process, we give the player a warning that the Evac-Chopper needs free sight around
+"WARNING! Evac-Chopper needs free sight to all sides, Make sure you have no objects like Buildings or Trees around!" call dayz_rollingMessages;
+uiSleep 3;
+"Building Evac-Chopper, move to cancel" call dayz_rollingMessages;
 
-	//Before we start the building process, we give the player a warning that the Evac-Chopper needs free sight around
-	"WARNING! Evac-Chopper needs free sight to all sides, Make sure you have no objects like Buildings or Trees around!" call dayz_rollingMessages;
-	uiSleep 3;
-	"Building Evac-Chopper, move to cancel" call dayz_rollingMessages;
-	
-	//Build Animation
-	_finished = ["Medic",1] call fn_loopAction;
-	if (!_finished) exitWith {dayz_actionInProgress = false;"You have canceled your Evac_Chopper" call dayz_rollingMessages;};
-	
-	// Sound Effects
-	_dis=20;
-	_sfx = "repair";
-	[player,_sfx,0,false,_dis] call dayz_zombieSpeak;
-	
-	// Build helipad
-	if (_finished) then {
-	
-		// Remove money from inventory
-		[player, "ItemBriefcase100oz", evac_chopperPrice] call BIS_fnc_invRemove;
-		"Thanks for your payment!" call dayz_rollingMessages;
-		call player_forceSave;
-		
-		_obj = createVehicle ["HeliHRescue", _location, [], 0, "CAN_COLLIDE"];
-		_obj addEventHandler ["HandleDamage", {false}];
-		_obj enableSimulation false;
-		_obj setDir _dir;
-		_obj setPosATL _location;
-		_vector = [(vectorDir _obj),(vectorUp _obj)];
+//Build Animation
+_finished = ["Medic",1] call fn_loopAction;
+if (!_finished) exitWith {dayz_actionInProgress = false;"You have canceled your Evac_Chopper" call dayz_rollingMessages;};
 
-		// Send publishing information to server
-		_obj setVariable ["CharacterID",dayz_characterID,true];
-		if (DZE_permanentPlot) then {
-			_obj setVariable ["ownerPUID",dayz_playerUID,true];
-			PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location,dayz_playerUID,_vector],[],player,dayz_authKey];
-		} else {
-			PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location, _vector],[],player,dayz_authKey];
-		};
-		publicVariableServer "PVDZ_obj_Publish";
-		PVDZE_EvacChopperFieldsUpdate = ["add",_obj];
-		publicVariableServer "PVDZE_EvacChopperFieldsUpdate";
-		
-		//Set end variables
-		dayz_actionInProgress = false;
-		s_player_evacChopper_ctrl = -1;
-		playerHasEvacField = true;
-		playersEvacField = _obj;
-		
-		"You have made an Evac-Chopper" call dayz_rollingMessages;
-	};
+// Remove money from player
+if (evac_chopperUseZSC && Z_singleCurrency) then {
+	_playerMoney = player getVariable [Z_MoneyVariable,0];
+	player setVariable [Z_MoneyVariable,_playerMoney - evac_chopperPriceZSC,true];
+	"Thanks for your payment!" call dayz_rollingMessages;
+	call player_forceSave;
+} else {
+	[player, "ItemBriefcase100oz", evac_chopperPrice] call BIS_fnc_invRemove;
+	"Thanks for your payment!" call dayz_rollingMessages;
+	call player_forceSave;
 };
+
+// Build helipad
+_obj = createVehicle ["HeliHRescue", _location, [], 0, "CAN_COLLIDE"];
+_obj addEventHandler ["HandleDamage", {false}];
+_obj enableSimulation false;
+_obj setDir _dir;
+_obj setPosATL _location;
+_vector = [(vectorDir _obj),(vectorUp _obj)];
+
+// Send publishing information to server
+_obj setVariable ["CharacterID",dayz_characterID,true];
+if (DZE_permanentPlot) then {
+	_obj setVariable ["ownerPUID",dayz_playerUID,true];
+	PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location,dayz_playerUID,_vector],[],player,dayz_authKey];
+} else {
+	PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location, _vector],[],player,dayz_authKey];
+};
+publicVariableServer "PVDZ_obj_Publish";
+PVDZE_EvacChopperFieldsUpdate = ["add",_obj];
+publicVariableServer "PVDZE_EvacChopperFieldsUpdate";
+
+//Set end variables
+dayz_actionInProgress = false;
+s_player_evacChopper_ctrl = -1;
+playerHasEvacField = true;
+playersEvacField = _obj;
+
+"You have made an Evac-Chopper" call dayz_rollingMessages;
 
 //Thats it for the creation part of the Evac-Chopper
 //Hope you enjoyed it :)

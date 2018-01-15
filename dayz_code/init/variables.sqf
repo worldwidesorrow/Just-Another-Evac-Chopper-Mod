@@ -1,10 +1,18 @@
 DayZ_SafeObjects = DayZ_SafeObjects + ["HeliHRescue"];
 
-playerHasEvacField = false;
-playersEvacField = objNull;
-s_player_evacChopper = [];
-//Evac Chopper Config Variables
-evac_chopperPrice = 2; //Any amount between 1-12 briefcases.
+// Evac Chopper Static Variables
+playerHasEvacField = false; // DO NOT CHANGE.
+playersEvacField = objNull; // DO NOT CHANGE.
+s_player_evacChopper = []; // DO NOT CHANGE.
+
+// Evac Chopper Config Variables
+evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 briefcases). Players must have the briefcases in their inventory.
+evac_chopperUseZSC = false; // If you have ZSC installed you can set this to true and have players pay the amount below to set up an evac chopper.
+evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
+evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
+evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
+evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
+evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
 
 //Player self-action handles
 dayz_resetSelfActions = {
@@ -96,7 +104,7 @@ dayz_resetSelfActions = {
 	s_player_manageDoor = -1;
 	
 	// Custom Below
-	//s_player_evacChopper = [];
+	
 	s_player_evacChopper_ctrl = -1;
 };
 call dayz_resetSelfActions;
