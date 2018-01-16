@@ -19,18 +19,18 @@ Note: all of the files that need to be modified are included in this repository 
 4. Copy the ***scripts*** folder over to the root of your mission folder, or if you already have a scripts folder copy the ***JAEM*** folder into it.
 5. Copy the ***dayz_code*** folder over to the root of your mission folder if you don't already have it. If you already have a dayz_code folder and the same files from a previous install, you will edit your existing files in step 7.
 
-#### 6. init.sqf
-	
-  Find this line:
+6. init.sqf
+
+	Find this code at the bottom of the file:
 
 	```sqf
-	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\variables.sqf";
+	allowConnection = true;	
 	```
 	
-  Add the following line ***below*** it if you don't already have it from a previous install:
+	And add the following line ***above*** it:
 	
 	```sqf
-	call compile preprocessFileLineNumbers "dayz_code\init\variables.sqf";
+	[] ExecVM "\z\addons\dayz_server\WAI\init.sqf";
 	```
   
   Find this line:
