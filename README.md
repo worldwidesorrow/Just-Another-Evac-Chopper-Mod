@@ -269,6 +269,8 @@ Note: all of the files that need to be modified are included in this repository 
 
 13. A complete set of the necessary BattlEye files have been provided in the BattlEye. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
 
+Note: These are to be used with the stock BattlEye filters that come with the 1.0.6.2 server files. If you are using a different set of filters then the numbers will not line up.
+
 #### publicvariable.txt
 
   Add this to the end of line 2:
