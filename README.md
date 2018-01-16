@@ -20,26 +20,26 @@ Note: all of the files that need to be modified are included in this repository 
 5. Copy the ***dayz_code*** folder over to the root of your mission folder if you don't already have it. If you already have a dayz_code folder and the same files from a previous install, you will edit your existing files in step 7.
 
 #### 6. init.sqf
-
-   Find this line:
+	
+  Find this line:
 
 	```sqf
 	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\variables.sqf";
 	```
 	
-   Add the following line ***below*** it if you don't already have it from a previous install:
+  Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
 	call compile preprocessFileLineNumbers "dayz_code\init\variables.sqf";
 	```
   
-   Find this line:
+  Find this line:
 
 	```sqf
 	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";
 	```
 	
-   Add the following line ***below*** it if you don't already have it from a previous install:
+  Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
 	call compile preprocessFileLineNumbers "dayz_code\init\compiles.sqf";
@@ -51,7 +51,7 @@ Note: all of the files that need to be modified are included in this repository 
 	waitUntil {scriptDone progress_monitor};
 	```
 	
-   Add the following line ***above*** it:
+  Add the following line ***above*** it:
 	
 	```sqf
 	[] execVM "scripts\JAEM\EvacChopper_init.sqf";
