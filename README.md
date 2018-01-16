@@ -21,45 +21,45 @@ Note: all of the files that need to be modified are included in this repository 
 
 6. init.sqf
 
-	Find this code at the bottom of the file:
+	Find this line:
 
 	```sqf
-	allowConnection = true;	
+	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\variables.sqf";	
 	```
 	
-	And add the following line ***above*** it:
+	Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
-	[] ExecVM "\z\addons\dayz_server\WAI\init.sqf";
+	call compile preprocessFileLineNumbers "dayz_code\init\variables.sqf";
 	```
   
-  Find this line:
+  	Find this line:
 
 	```sqf
 	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";
 	```
 	
-  Add the following line ***below*** it if you don't already have it from a previous install:
+  	Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
 	call compile preprocessFileLineNumbers "dayz_code\init\compiles.sqf";
 	```
   
-  Find this line:
+  	Find this line:
 
 	```sqf
 	waitUntil {scriptDone progress_monitor};
 	```
 	
-  Add the following line ***above*** it:
+  	Add the following line ***above*** it:
 	
 	```sqf
 	[] execVM "scripts\JAEM\EvacChopper_init.sqf";
 	```
 
-### 7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
-   Find this block of code:
+   	Find this block of code:
 
 	```sqf
 	} else {
@@ -71,7 +71,7 @@ Note: all of the files that need to be modified are included in this repository 
 			};
 	```
 	
-   Add the following block of code below it ***below*** it:
+  	 Add the following block of code below it ***below*** it:
 	
 	```sqf
 	if (s_player_evacChopper_ctrl < 0) then {
@@ -91,20 +91,20 @@ Note: all of the files that need to be modified are included in this repository 
 			};
 	```
   
-  Find these two lines:
+  	Find these two lines:
 
 	```sqf
 	{player removeAction _x} count s_player_lockunlock;s_player_lockunlock = [];
 		s_player_lockUnlock_crtl = -1;
 	```
 	
-  Add the following lines ***below*** them:
+  	Add the following lines ***below*** them:
 	
 	```sqf
 	{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
 		s_player_evacChopper_ctrl = -1;
 	```
-   Use the file I provided in the download to compare your results with. The finished result should look like this.
+   	Use the file I provided in the download to compare your results with. The finished result should look like this.
   
   ```sqf
 	} else {
@@ -139,28 +139,28 @@ Note: all of the files that need to be modified are included in this repository 
 	};
 	```
   
-  Find this line (around line 1104:
+  	Find this line (around line 1104:
 
 	```sqf
 	s_player_lockUnlock_crtl = -1;
 	```
 	
-  Add the following lines ***below*** it:
+  	Add the following lines ***below*** it:
 	
 	```sqf
 	{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
 	s_player_evacChopper_ctrl = -1;
 	```
   
-### 8. If you already have a custom variables.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+8. If you already have a custom variables.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
-Add the following line to your custom variables.sqf if you don't have it already. It does not matter where it is located in the file.
+	Add the following line to your custom variables.sqf if you don't have it already. It does not matter where it is located in the file.
 
 	```sqf
 	DayZ_SafeObjects = DayZ_SafeObjects + ["HeliHRescue"];
 	```
 	
-If you already have a customized DayZ_SafeObjects array, then add HeliRescue to the end of it like shown above.
+	If you already have a customized DayZ_SafeObjects array, then add HeliRescue to the end of it like shown above.
 	
 	Add the following lines to your custom variables.sqf. It does not matter where these are placed in the file.
 	
@@ -180,31 +180,31 @@ evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call
 evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
 	```
   
-  Add the entire block of code below this line if you don't already have it:
+  	Add the entire block of code below this line if you don't already have it:
   
-    ```sqf
-    //Player self-action handles
+    	```sqf
+    	//Player self-action handles
   	```
-    If you already have this section from a prior install then just add the following line to the bottom above the };
+    	If you already have this section from a prior install then just add the following line to the bottom above the };
 
 	```sqf
 	s_player_evacChopper_ctrl = -1;
 	```
-Make sure you compare your file with the one in the download so the line ends up in the correct place.
+	Make sure you compare your file with the one in the download so the line ends up in the correct place.
 
-### 9. If you already have a custom compiles.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+9. If you already have a custom compiles.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
- Copy the following line over to the !isDedicated section if you don't have it already from a prior install:
+ 	Copy the following line over to the !isDedicated section if you don't have it already from a prior install:
   
-    ```sqf
-    fnc_usec_selfactions = compile preprocessFileLineNumbers "dayz_code\compile\fn_selfActions.sqf";
+    	```sqf
+    	fnc_usec_selfactions = compile preprocessFileLineNumbers "dayz_code\compile\fn_selfActions.sqf";
   	```
     
 10. Repack you mission PBO.
 
 11. Unpack your server PBO and open ***dayz_server\system\server_monitor.sqf***
 
-Find this line:
+	Find this line:
 
 	```sqf
 	_DZE_VehObjects = [];
@@ -216,7 +216,7 @@ Find this line:
 	PVDZE_EvacChopperFields = [];
 	```
   
-  Find this line:
+  	Find this line:
 
 	```sqf
 	_object setVariable ["CharacterID", _ownerID, true];
@@ -230,7 +230,7 @@ Find this line:
 			};
 	```
   
-  Find this line:
+  	Find this line:
 
 	```sqf
 	publicVariable "sm_done";
