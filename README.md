@@ -19,7 +19,7 @@ Note: all of the files that need to be modified are included in this repository 
 4. Copy the ***scripts*** folder over to the root of your mission folder, or if you already have a scripts folder copy the ***JAEM*** folder into it.
 5. Copy the ***dayz_code*** folder over to the root of your mission folder if you don't already have it. If you already have a dayz_code folder and the same files from a previous install, you will edit your existing files in step 7.
 
-# 6. init.sqf
+### 6. init.sqf
 
 	Find this line:
 
@@ -57,7 +57,7 @@ Note: all of the files that need to be modified are included in this repository 
 	[] execVM "scripts\JAEM\EvacChopper_init.sqf";
 	```
 
-#7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+### 7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
 Find this block of code:
 
@@ -152,7 +152,7 @@ Find this block of code:
 	s_player_evacChopper_ctrl = -1;
 	```
   
-#7. If you already have a custom variables.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+### 8. If you already have a custom variables.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
 Add the following line to your custom variables.sqf if you don't have it already. It does not matter where it is located in the file.
 
@@ -192,7 +192,7 @@ evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything 
 	```
 Make sure you compare your file with the one in the download so the line ends up in the correct place.
 
-#8. If you already have a custom compiles.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+### 9. If you already have a custom compiles.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
  Copy the following line over to the !isDedicated section if you don't have it already from a prior install:
   
@@ -200,9 +200,9 @@ Make sure you compare your file with the one in the download so the line ends up
     fnc_usec_selfactions = compile preprocessFileLineNumbers "dayz_code\compile\fn_selfActions.sqf";
   	```
     
-9. Repack you mission PBO.
+10. Repack you mission PBO.
 
-10. Unpack your server PBO and open ***dayz_server\system\server_monitor.sqf***
+11. Unpack your server PBO and open ***dayz_server\system\server_monitor.sqf***
 
 Find this line:
 
@@ -264,7 +264,7 @@ Find this line:
 };
 	```
   
-11. Repack your server PBO
+12. Repack your server PBO
 
 
     
