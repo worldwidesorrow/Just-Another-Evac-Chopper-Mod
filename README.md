@@ -261,8 +261,8 @@ Note: all of the files that need to be modified are included in this repository 
 
     	"PVDZE_EvacChopperFieldsUpdate" addPublicVariableEventHandler {(_this select 1) spawn ON_fnc_evacChopperFieldsUpdate};
 
-    EvacServerPreload = true;
-};
+    	EvacServerPreload = true;
+	};
 	```
   
 12. Repack your server PBO
