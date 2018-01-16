@@ -63,32 +63,33 @@ Note: all of the files that need to be modified are included in this repository 
 
 	```sqf
 	} else {
-				if (_hasKey || _oldOwner) then {
-					_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
-					s_player_lockunlock set [count s_player_lockunlock,_lock];
-					s_player_lockUnlock_crtl = 1;
-				};
-			};
+		if (_hasKey || _oldOwner) then {
+		_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
+		s_player_lockunlock set [count s_player_lockunlock,_lock];
+		s_player_lockUnlock_crtl = 1;
+		};
+	};
 	```
 	
-  	 Add the following block of code below it ***below*** it:
+  	Add the following block of code below it ***below*** it:
 	
 	```sqf
+	//Evac Chopper
 	if (s_player_evacChopper_ctrl < 0) then {
-				private ["_setEvac","_clearEvac"];
-				if (_hasKey || _oldOwner) then {
-					if ((_cursorTarget isKindOf "Helicopter") && (!playerHasEvacField)) then {
-						_setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,false];
-						s_player_evacChopper set [count s_player_evacChopper,_setEvac];
-						s_player_evacChopper_ctrl = 1;
-					};
-					if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
-						_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
-						s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
-						s_player_evacChopper_ctrl = 1;
-					};
-				};
+		private ["_setEvac","_clearEvac"];
+		if (_hasKey || _oldOwner) then {
+			if ((_cursorTarget isKindOf "Helicopter") && (!playerHasEvacField)) then {
+				_setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,false];
+				s_player_evacChopper set [count s_player_evacChopper,_setEvac];
+				s_player_evacChopper_ctrl = 1;
 			};
+			if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
+				_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
+				s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
+				s_player_evacChopper_ctrl = 1;
+			};
+		};
+	};
 	```
   
   	Find these two lines:
@@ -107,30 +108,30 @@ Note: all of the files that need to be modified are included in this repository 
    	Use the file I provided in the download to compare your results with. The finished result should look like this.
   
   	```sqf
-	} else {
-				if (_hasKey || _oldOwner) then {
-					_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
-					s_player_lockunlock set [count s_player_lockunlock,_lock];
-					s_player_lockUnlock_crtl = 1;
-				};
+		} else {
+			if (_hasKey || _oldOwner) then {
+				_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
+				s_player_lockunlock set [count s_player_lockunlock,_lock];
+				s_player_lockUnlock_crtl = 1;
 			};
-			//Evac Chopper
-			if (s_player_evacChopper_ctrl < 0) then {
-				private ["_setEvac","_clearEvac"];
-				if (_hasKey || _oldOwner) then {
-					if ((_cursorTarget isKindOf "Helicopter") && (!playerHasEvacField)) then {
-						_setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,false];
-						s_player_evacChopper set [count s_player_evacChopper,_setEvac];
-						s_player_evacChopper_ctrl = 1;
-					};
-					if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
-						_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
-						s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
-						s_player_evacChopper_ctrl = 1;
-					};
+		};
+		//Evac Chopper
+		if (s_player_evacChopper_ctrl < 0) then {
+			private ["_setEvac","_clearEvac"];
+			if (_hasKey || _oldOwner) then {
+				if ((_cursorTarget isKindOf "Helicopter") && (!playerHasEvacField)) then {
+					_setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,false];
+					s_player_evacChopper set [count s_player_evacChopper,_setEvac];
+					s_player_evacChopper_ctrl = 1;
+				};
+				if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
+					_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
+					s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
+					s_player_evacChopper_ctrl = 1;
 				};
 			};
 		};
+	};
 	} else {
 		{player removeAction _x} count s_player_lockunlock;s_player_lockunlock = [];
 		s_player_lockUnlock_crtl = -1;
@@ -166,18 +167,18 @@ Note: all of the files that need to be modified are included in this repository 
 	
 	```sqf
 	// Evac Chopper Static Variables
-playerHasEvacField = false; // DO NOT CHANGE.
-playersEvacField = objNull; // DO NOT CHANGE.
-s_player_evacChopper = []; // DO NOT CHANGE.
+	playerHasEvacField = false; // DO NOT CHANGE.
+	playersEvacField = objNull; // DO NOT CHANGE.
+	s_player_evacChopper = []; // DO NOT CHANGE.
 
-// Evac Chopper Config Variables
-evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 briefcases). Players must have the briefcases in their inventory.
-evac_chopperUseZSC = false; // If you have ZSC installed you can set this to true and have players pay the amount below to set up an evac chopper.
-evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
-evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
-evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
-evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
-evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
+	// Evac Chopper Config Variables
+	evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 	briefcases). Players must have the briefcases in their inventory.
+	evac_chopperUseZSC = false; // If you have ZSC installed you can set this to true and have players pay the amount below to set up an evac chopper.
+	evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
+	evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
+	evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
+	evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
+	evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
 	```
   
   	Add the entire block of code below this line if you don't already have it:
