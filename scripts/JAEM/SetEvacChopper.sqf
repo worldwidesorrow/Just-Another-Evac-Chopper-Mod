@@ -44,6 +44,7 @@ if (evac_chopperUseZSC && Z_singleCurrency) then {
 	if (_playerMoney < evac_chopperPriceZSC) exitWith {
 		dayz_actionInProgress = false;
 		format["Making an Evac-Chopper costs %1 Coins", evac_chopperPriceZSC] call dayz_rollingMessages;
+		breakOut "exit";
 	};
 } else {	
 	_hasBriefcase = {_x == "ItemBriefcase100oz"} count (magazines player);
