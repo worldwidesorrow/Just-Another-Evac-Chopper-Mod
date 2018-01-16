@@ -12,7 +12,7 @@ I have upgraded this version to be ZSC and Deploy Anything compatible. ZSC can b
   
 Note: all of the files that need to be modified are included in this repository if you prefer to use a merging tool to update your existing files. Otherwise, follow the instructions below.
 
-### This install is rather complicated, so make sure you back up your existing mission and server PBO in case you make a mistake.
+### This install is rather complicated, so make sure you back up your existing mission and server PBOs in case you make a mistake.
 
 2. Extract the downloaded folder and open it.
 3. Unpack your mission PBO.
