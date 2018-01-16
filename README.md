@@ -106,7 +106,7 @@ Note: all of the files that need to be modified are included in this repository 
 	```
    	Use the file I provided in the download to compare your results with. The finished result should look like this.
   
-  ```sqf
+  	```sqf
 	} else {
 				if (_hasKey || _oldOwner) then {
 					_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
