@@ -183,10 +183,10 @@ Note: all of the files that need to be modified are included in this repository 
   
   	Add the entire block of code below this line if you don't already have it:
   
-    	```sqf
+   ```sqf
     	//Player self-action handles
-  	```
-    	If you already have this section from a prior install then just add the following line to the bottom above the };
+	```
+	If you already have this section from a prior install then just add the following line to the bottom above the };
 
 	```sqf
 	s_player_evacChopper_ctrl = -1;
@@ -197,7 +197,7 @@ Note: all of the files that need to be modified are included in this repository 
 
  	Copy the following line over to the !isDedicated section if you don't have it already from a prior install:
   
-    	```sqf
+    ```sqf
     	fnc_usec_selfactions = compile preprocessFileLineNumbers "dayz_code\compile\fn_selfActions.sqf";
   	```
     
@@ -241,12 +241,12 @@ Note: all of the files that need to be modified are included in this repository 
 	
 	```sqf
 	if (isServer && (isNil "EvacServerPreload")) then {
-    publicVariable "PVDZE_EvacChopperFields";
+    		publicVariable "PVDZE_EvacChopperFields";
     
-    ON_fnc_evacChopperFieldsUpdate = {
-        private ["_action","_targetField"];
-        _action = _this select 0;
-        _targetField = _this select 1;
+   	 ON_fnc_evacChopperFieldsUpdate = {
+        	private ["_action","_targetField"];
+        	_action = _this select 0;
+        	_targetField = _this select 1;
         
         if (_action == "add") then {
             PVDZE_EvacChopperFields = PVDZE_EvacChopperFields + [_targetField];
@@ -257,9 +257,9 @@ Note: all of the files that need to be modified are included in this repository 
         };
         
         publicVariable "PVDZE_EvacChopperFields";
-    };
+    	};
 
-    "PVDZE_EvacChopperFieldsUpdate" addPublicVariableEventHandler {(_this select 1) spawn ON_fnc_evacChopperFieldsUpdate};
+    	"PVDZE_EvacChopperFieldsUpdate" addPublicVariableEventHandler {(_this select 1) spawn ON_fnc_evacChopperFieldsUpdate};
 
     EvacServerPreload = true;
 };
