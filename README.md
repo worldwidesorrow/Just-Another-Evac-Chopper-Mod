@@ -21,25 +21,25 @@ Note: all of the files that need to be modified are included in this repository 
 
 #### 6. init.sqf
 
-	Find this line:
+   Find this line:
 
 	```sqf
 	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\variables.sqf";
 	```
 	
-	Add the following line ***below*** it if you don't already have it from a previous install:
+   Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
 	call compile preprocessFileLineNumbers "dayz_code\init\variables.sqf";
 	```
   
-  Find this line:
+   Find this line:
 
 	```sqf
 	call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";
 	```
 	
-	Add the following line ***below*** it if you don't already have it from a previous install:
+   Add the following line ***below*** it if you don't already have it from a previous install:
 	
 	```sqf
 	call compile preprocessFileLineNumbers "dayz_code\init\compiles.sqf";
@@ -51,7 +51,7 @@ Note: all of the files that need to be modified are included in this repository 
 	waitUntil {scriptDone progress_monitor};
 	```
 	
-	Add the following line ***above*** it:
+   Add the following line ***above*** it:
 	
 	```sqf
 	[] execVM "scripts\JAEM\EvacChopper_init.sqf";
@@ -59,7 +59,7 @@ Note: all of the files that need to be modified are included in this repository 
 
 ### 7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
 
-Find this block of code:
+   Find this block of code:
 
 	```sqf
 	} else {
@@ -71,7 +71,7 @@ Find this block of code:
 			};
 	```
 	
-	Add the following block of code below it ***below*** it:
+   Add the following block of code below it ***below*** it:
 	
 	```sqf
 	if (s_player_evacChopper_ctrl < 0) then {
@@ -98,7 +98,7 @@ Find this block of code:
 		s_player_lockUnlock_crtl = -1;
 	```
 	
-	Add the following lines ***below*** them:
+  Add the following lines ***below*** them:
 	
 	```sqf
 	{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
@@ -145,7 +145,7 @@ Find this block of code:
 	s_player_lockUnlock_crtl = -1;
 	```
 	
-	Add the following lines ***below*** it:
+  Add the following lines ***below*** it:
 	
 	```sqf
 	{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
