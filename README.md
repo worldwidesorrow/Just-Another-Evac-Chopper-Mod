@@ -354,7 +354,9 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	
 ### Mudzereli's Deploy Anything Option
 
-  If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then find this variable in your custom variables.sqf
+  If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then   find this variable in your custom variables.sqf
+  
+   Find this variable
   
   	```sqf
 	evac_chopperUseClickActions = false;
@@ -384,6 +386,8 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 ### ZSC Option
 
    If you have it installed, you can use ZSC to pay for you evac chopper creation. Find this variable in your custom variables.sqf:
+   
+   Find this variable
   
   	```sqf
 	evac_chopperUseZSC = false;
@@ -400,7 +404,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
   	```sqf
 	evac_chopperPriceZSC = 100000;
 	```
-	
+
    You are finished with the install.
 	
 	
