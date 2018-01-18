@@ -352,7 +352,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""
 	```
 	
-### Mudzereli's Deploy Anything Option
+***Mudzereli's Deploy Anything Option***
 
   If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then   find this variable in your custom variables.sqf
   
@@ -384,7 +384,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	!="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
 	```
 	
-### ZSC Option
+***ZSC Option***
 
    If you have it installed, you can use ZSC to pay for you evac chopper creation. Find this variable in your custom variables.sqf:
    
