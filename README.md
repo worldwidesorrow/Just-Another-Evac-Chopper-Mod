@@ -280,7 +280,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	```
 2. remoteexec.txt
 
-  Add this to the end of line 2:
+   Add this to the end of line 2:
   
   	```sqf
 	!="true" !="evacZoneReached = true; evacChopper land 'LAND';" !=""
@@ -288,7 +288,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	
 3. waypointcondition.txt
 
-  Add this to the end of line 2:
+   Add this to the end of line 2:
   
   	```sqf
 	!="true"
@@ -296,7 +296,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	
 4. waypointstatements.txt
 
-  Add this to the end of line 2:
+   Add this to the end of line 2:
   
   	```sqf
 	!="evacZoneReached = true; evacChopper land 'LAND';" !=""
@@ -304,49 +304,49 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	
 5. scripts.txt
 
-  Add this to the end of line 17
+   Add this to the end of line 17
   
   	```sqf
 	!"\\dayz_code\\init\\compiles.sqf\"\nif (!isDedicated) then {\ndiag_log \"Loading custom client com"
 	```
 	
-  Add this to the end of line 2:
+   Add this to the end of line 2:
   
   	```sqf
 	!=" (s_player_evacCall < 0) then {\ns_player_evacCall = player addAction [(\"<t color=\"\"#0000FF\"\">\" + (\"Call Evac-Chopper\") + \"</t>\")"
 	```
-	
-  Add this to the end of line 11:
+ 	
+   Add this to the end of line 11:
  
   	```sqf
 	!="er setPosATL ([evacChopper] call FNC_GetPos);\n_finishMarker attachTo [evacChopper,[0,0,0]];\n};\nif (_dayTime > 18.5 && _dayTime <"
 	```
 	
-  Add this to the end of line 22:
+   Add this to the end of line 22:
   
   	```sqf
 	!="up = createGroup WEST;\nevacChopperPilot = evacChopperGroup createUnit [\"USMC_Soldier_pilot\", evacChopper, [], 0,\"LIEUTENANT\"];\nr"
 	```
 	
-  Add this to the end of line 38:
+   Add this to the end of line 38:
   
   	```sqf
 	!="format[\"%1m\", round (evacChopper distance _evacZone)];\n};\n};\n\nhintSilent parseText format [\"\n		<t size='1.15'	font='Bitstream'al"
 	```
 	
-  Add this to the end of line 47:
+   Add this to the end of line 47:
   
   	```sqf
 	!="t;\nremoveallitems evacChopperPilot;\nevacChopperPilot removeAllEventHandlers \"HandleDamage\";\nevacChopperPilot addEventHandler [\"H"
 	```
 	
-  Add this to the end of line 68:
+   Add this to the end of line 68:
   
   	```sqf
 	!="Pos;\n_chopperStartPos = _getChopperStartPos;\n\n\nevacChopper setVehicleLock \"UNLOCKED\";\nevacChopperGroup = createGroup WEST;\nevacC"
 	```
 	
-  Add this to the end of line 72:
+   Add this to the end of line 72:
   
   	```sqf
 	!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""
