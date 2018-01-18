@@ -358,53 +358,53 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
   
    Find this variable
   
-  	```sqf
-	evac_chopperUseClickActions = false;
-	```
+  	 ```sqf
+	 evac_chopperUseClickActions = false;
+	 ```
    
    and change to:
   
-  	```sqf
-	evac_chopperUseClickActions = true;
-	```
+  	 ```sqf
+	 evac_chopperUseClickActions = true;
+	 ```
 	
   Open your mission file and find file ***overwrites\click_actions\config.sqf***.
   
    Add this to the bottom of the DZE_CLICK_ACTIONS array:
   
-  	```sqf
-	["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
-	```
+  	 ```sqf
+	 ["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
+	 ```
 	
    Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default.
   
    I had to add this exception to the end of line 32 in scripts.txt
   
-  	```sqf
-	!="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
-	```
+  	 ```sqf
+	 !="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
+	 ```
 	
 ***ZSC Option***
 
    If you have it installed, you can use ZSC to pay for you evac chopper creation. Find this variable in your custom variables.sqf:
    
    Find this variable
-  
-  	```sqf
-	evac_chopperUseZSC = false;
-	```
+   
+  	 ```sqf
+	 evac_chopperUseZSC = false;
+	 ```
 	
    Change this variable to:
   
-  	```sqf
-	evac_chopperUseZSC = true;
-	```
+  	 ```sqf
+	 evac_chopperUseZSC = true;
+	 ```
 	
    You can adjust the price with this variable:
   
-  	```sqf
-	evac_chopperPriceZSC = 100000;
-	```
+  	 ```sqf
+	 evac_chopperPriceZSC = 100000;
+	 ```
 
    You are finished with the install.
 	
