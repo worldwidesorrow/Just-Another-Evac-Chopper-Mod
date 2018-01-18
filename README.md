@@ -361,6 +361,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
   	```sqf
 	evac_chopperUseClickActions = false;
 	```
+   
    and change to:
   
   	```sqf
@@ -375,7 +376,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
 	```
 	
-  Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default.
+   Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default.
   
    I had to add this exception to the end of line 32 in scripts.txt
   
