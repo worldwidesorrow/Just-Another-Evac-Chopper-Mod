@@ -140,7 +140,7 @@ Note: all of the files that need to be modified are included in this repository 
 	};
 	```
   
-  	Find this line (around line 1104:
+  	Find this line (around line 1104):
 
 	```sqf
 	s_player_lockUnlock_crtl = -1;
@@ -267,7 +267,7 @@ Note: all of the files that need to be modified are included in this repository 
   
 12. Repack your server PBO
 
-13. A complete set of the necessary BattlEye files have been provided in the BattlEye. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
+13. A complete set of the necessary BattlEye files have been provided in the BattlEye folder. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
 
 Note: These are to be used with the stock BattlEye filters that come with the 1.0.6.2 server files. If you are using a different set of filters then the numbers will not line up.
 
@@ -275,131 +275,131 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 
   Add this to the end of line 2:
   
-  	```sqf
-	!=PVDZE_EvacChopperFieldsUpdate
-	```
+  		```sqf
+		!=PVDZE_EvacChopperFieldsUpdate
+		```
 #### remoteexec.txt
 
   Add this to the end of line 2:
   
-  	```sqf
-	!="true" !="evacZoneReached = true; evacChopper land 'LAND';" !=""
-	```
+  		```sqf
+		!="true" !="evacZoneReached = true; evacChopper land 'LAND';" !=""
+		```
 	
 #### waypointcondition.txt
 
   Add this to the end of line 2:
   
-  	```sqf
-	!="true"
-	```
+  		```sqf
+		!="true"
+		```
 	
 #### waypointstatements.txt
 
   Add this to the end of line 2:
   
-  	```sqf
-	!="evacZoneReached = true; evacChopper land 'LAND';" !=""
-	```
+  		```sqf
+		!="evacZoneReached = true; evacChopper land 'LAND';" !=""
+		```
 	
 #### scripts.txt
 
   Add this to the end of line 17
   
-  	```sqf
-	!"\\dayz_code\\init\\compiles.sqf\"\nif (!isDedicated) then {\ndiag_log \"Loading custom client com"
-	```
+  		```sqf
+		!"\\dayz_code\\init\\compiles.sqf\"\nif (!isDedicated) then {\ndiag_log \"Loading custom client com"
+		```
 	
   Add this to the end of line 2:
   
-  	```sqf
-	!=" (s_player_evacCall < 0) then {\ns_player_evacCall = player addAction [(\"<t color=\"\"#0000FF\"\">\" + (\"Call Evac-Chopper\") + \"</t>\")"
-	```
+  		```sqf
+		!=" (s_player_evacCall < 0) then {\ns_player_evacCall = player addAction [(\"<t color=\"\"#0000FF\"\">\" + (\"Call Evac-Chopper\") + \"</t>\")"
+		```
 	
   Add this to the end of line 11:
   
-  	```sqf
-	!="er setPosATL ([evacChopper] call FNC_GetPos);\n_finishMarker attachTo [evacChopper,[0,0,0]];\n};\nif (_dayTime > 18.5 && _dayTime <"
-	```
+  		```sqf
+		!="er setPosATL ([evacChopper] call FNC_GetPos);\n_finishMarker attachTo [evacChopper,[0,0,0]];\n};\nif (_dayTime > 18.5 && _dayTime <"
+		```
 	
   Add this to the end of line 22:
   
-  	```sqf
-	!="up = createGroup WEST;\nevacChopperPilot = evacChopperGroup createUnit [\"USMC_Soldier_pilot\", evacChopper, [], 0,\"LIEUTENANT\"];\nr"
-	```
+  		```sqf
+		!="up = createGroup WEST;\nevacChopperPilot = evacChopperGroup createUnit [\"USMC_Soldier_pilot\", evacChopper, [], 0,\"LIEUTENANT\"];\nr"
+		```
 	
   Add this to the end of line 38:
   
-  	```sqf
-	!="format[\"%1m\", round (evacChopper distance _evacZone)];\n};\n};\n\nhintSilent parseText format [\"\n		<t size='1.15'	font='Bitstream'al"
-	```
+  		```sqf
+		!="format[\"%1m\", round (evacChopper distance _evacZone)];\n};\n};\n\nhintSilent parseText format [\"\n		<t size='1.15'	font='Bitstream'al"
+		```
 	
   Add this to the end of line 47:
   
-  	```sqf
-	!="t;\nremoveallitems evacChopperPilot;\nevacChopperPilot removeAllEventHandlers \"HandleDamage\";\nevacChopperPilot addEventHandler [\"H"
-	```
+  		```sqf
+		!="t;\nremoveallitems evacChopperPilot;\nevacChopperPilot removeAllEventHandlers \"HandleDamage\";\nevacChopperPilot addEventHandler [\"H"
+		```
 	
   Add this to the end of line 68:
   
-  	```sqf
-	!="Pos;\n_chopperStartPos = _getChopperStartPos;\n\n\nevacChopper setVehicleLock \"UNLOCKED\";\nevacChopperGroup = createGroup WEST;\nevacC"
-	```
+  		```sqf
+		!="Pos;\n_chopperStartPos = _getChopperStartPos;\n\n\nevacChopper setVehicleLock \"UNLOCKED\";\nevacChopperGroup = createGroup WEST;\nevacC"
+		```
 	
   Add this to the end of line 72:
   
-  	```sqf
-	!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""
-	```
+  		```sqf
+		!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""
+		```
 	
 ### Mudzereli's Deploy Anything Option
 
   If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then find this variable in your custom variables.sqf
   
-  	```sqf
-	evac_chopperUseClickActions = false;
-	```
+  		```sqf
+		evac_chopperUseClickActions = false;
+		```
   and change to:
   
-  	```sqf
-	evac_chopperUseClickActions = true;
-	```
+  		```sqf
+		evac_chopperUseClickActions = true;
+		```
 	
   Open your mission file and find file ***overwrites\click_actions\config.sqf***.
   
   Add this to the bottom of the DZE_CLICK_ACTIONS array:
   
-  	```sqf
-	["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
-	```
+  		```sqf
+		["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
+		```
 	
   Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default.
   
   I had to add this exception to the end of line 32 in scripts.txt
   
-  	```sqf
-	!="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
-	```
+  		```sqf
+		!="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
+		```
 	
 ### ZSC Option
 
   If you have it installed, you can use ZSC to pay for you evac chopper creation. Find this variable in your custom variables.sqf:
   
-  	```sqf
-	evac_chopperUseZSC = false;
-	```
+  		```sqf
+		evac_chopperUseZSC = false;
+		```
 	
   Change this variable to:
   
-  	```sqf
-	evac_chopperUseZSC = true;
-	```
+  		```sqf
+		evac_chopperUseZSC = true;
+		```
 	
   You can adjust the price with this variable:
   
-  	```sqf
-	evac_chopperPriceZSC = 100000;
-	```
+  		```sqf
+		evac_chopperPriceZSC = 100000;
+		```
 	
   You are finished with the install.
 	
