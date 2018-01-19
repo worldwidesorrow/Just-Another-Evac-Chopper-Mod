@@ -373,10 +373,10 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
    Add this to the bottom of the DZE_CLICK_ACTIONS array:
   
   	```sqf
-	["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
+	["ItemGPS","Call Evac Chopper","if(!evac_chopperInProgress) then {execVM 'scripts\JAEM\callEvacChopper.sqf';} else {'You have already called an Evac Chopper' call dayz_rollingmessages;};","true"]
 	```
 	
-   Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default.
+   Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default. Make sure you put a comma on the one before the last.
   
    I had to add this exception to the end of line 32 in scripts.txt
   
