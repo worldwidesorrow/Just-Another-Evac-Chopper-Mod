@@ -9,11 +9,14 @@
 
 private ["_canceled","_cnt","_locationPlayer","_evacFieldID","_checkForChopper","_evacCallerUID","_evacFields","_heliHRescue","_routeFinished","_evacZone","_chopperStartPos","_getChopperStartPos","_evacZoneDistance","_startZoneWaypoint","_evacZoneWaypoint","_part","_damage","_hitpoints","_evacChopperFuel","_finishMarker","_evacZonePos","_dayTime"];
 
+if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = 1;};
+
+evac_chopperInProgress = true;
+
 if (evac_chopperUseClickActions && ((player distance playersEvacField) < evac_chopperMinDistance)) exitWith {
 	format["You must be at least %1 meters away to call your Evac-Chopper",evac_chopperMinDistance] call dayz_rollingMessages;
+	evac_chopperInProgress = false;
 };
-
-if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = 1;};
 
 _cnt = 5;
 _locationPlayer = [player] call FNC_GetPos;
@@ -30,6 +33,7 @@ for "_p" from 1 to 5 do
 
 if (_canceled) exitWith {"Evac-Chopper call canceled!" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+		evac_chopperInProgress = false;
 };
 
 "Searching for your Evac-Chopper - Please wait..." call dayz_rollingMessages;
@@ -56,6 +60,7 @@ if (!playerHasEvacField) then {
 if (!playerHasEvacField) exitWith {
 	"Sorry but you dont have an Evac-Chopper" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+		evac_chopperInProgress = false;
 };
 
 // Player has an evac field now check if a Chopper is on it
@@ -65,7 +70,8 @@ if ((count _checkForChopper) > 0) then {
 } else {
 	"Sorry but there is no Chopper on your Evac-Field" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-	breakOut "exit";
+		evac_chopperInProgress = false;
+		breakOut "exit";
 };
 
 // We found a Chopper
@@ -77,6 +83,7 @@ _evacChopperFuel = fuel evacChopper;
 if (_evacChopperFuel < 0.2) exitWith {
 	"Sorry but the Fuel of your Evac-Chopper is too low to fly to you" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+		evac_chopperInProgress = false;
 };
 
 // Damage check
@@ -96,10 +103,12 @@ _hitpoints = evacChopper call vehicle_getHitpoints;
 		if(_part == "PartEngine") exitWith {
 			"Sorry but the Engine of your Evac-Chopper is too damaged to fly" call dayz_rollingMessages;
 			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+				evac_chopperInProgress = false;
 		};
 		if (_part == "PartVRotor") exitWith {
 			"Sorry but the Main-Rotor of your Evac-Chopper is too damaged to fly" call dayz_rollingMessages;
 			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+				evac_chopperInProgress = false;
 		};
 	};
 } forEach _hitpoints;
@@ -205,6 +214,7 @@ if (!alive evacChopper) exitWith {
 		<t size='1.15'	font='Bitstream'align='center' 	color='#FFBF00'>!!! CRASHED !!!</t>			<br/>"
 	];
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+		evac_chopperInProgress = false;
 };
 
 // If player dies reset the Evac-Chopper to the start position, remove the AI Pilot and his group, delete the Evac-Zone Marker and exit the script.
@@ -223,6 +233,7 @@ if (!alive player) exitWith {
 	deleteGroup evacChopperGroup;
 	evacChopper setVehicleLock "LOCKED";
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+		evac_chopperInProgress = false;
 };
 
 //Create Visible Marker
@@ -284,7 +295,8 @@ evacChopper setVehicleLock "UNLOCKED";
 deleteVehicle _finishMarker;
 
 //reset the action menu variable
-if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};	
+if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+evac_chopperInProgress = false;	
 
 
 //Thats it for the Evacutaion process
