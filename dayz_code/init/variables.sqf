@@ -4,6 +4,7 @@ DayZ_SafeObjects = DayZ_SafeObjects + ["HeliHRescue"];
 playerHasEvacField = false; // DO NOT CHANGE.
 playersEvacField = objNull; // DO NOT CHANGE.
 s_player_evacChopper = []; // DO NOT CHANGE.
+evac_chopperInProgress = false; //DO NOT CHANGE.
 
 // Evac Chopper Config Variables
 evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 briefcases). Players must have the briefcases in their inventory.
