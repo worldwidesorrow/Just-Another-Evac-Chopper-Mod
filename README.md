@@ -220,10 +220,10 @@ Note: all of the files that need to be modified are included in this repository 
   	Find this line:
 
 	```sqf
-	_object setVariable ["CharacterID", _ownerID, true];
+	if (_isDZ_Buildable || {(_isSafeObject && !_isTrapItem)}) then {
 	```
 	
-	Add the following block of code ***below*** it:
+	Add the following block of code ***above*** it:
 	
 	```sqf
 	if ((typeOf _object) == "HeliHRescue") then {
