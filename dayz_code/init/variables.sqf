@@ -1,4 +1,4 @@
-DayZ_SafeObjects = DayZ_SafeObjects + ["HeliHRescue"];
+DayZ_SafeObjects set [count DayZ_SafeObjects, "HeliHRescue"];
 
 // Evac Chopper Static Variables
 playerHasEvacField = false; // DO NOT CHANGE.
@@ -14,6 +14,10 @@ evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopp
 evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
 evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
 evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
+evac_ChopperDisabledMarker = true; // Place a private map marker of the evac chopper's location
+evac_chopperMarkerTimeout = -1; // This will be the time in seconds that the marker will last before being deleted. (-1 = no timeout)
+
+if (isServer) then {"CallEvacChopper" addPublicVariableEventHandler {(_this select 1) spawn server_callEvacChopper;};};
 
 //Player self-action handles
 dayz_resetSelfActions = {

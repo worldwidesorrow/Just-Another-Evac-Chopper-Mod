@@ -1,4 +1,4 @@
-Just Another Evac-Chopper Mod v1.5
+Just Another Evac-Chopper Mod v1.6
 ==============
 
 This is an updated version of JAEM by OtterNas3. This version is updated to be compatible with DayZ Epoch 1.0.6.2.
@@ -158,10 +158,8 @@ Note: all of the files that need to be modified are included in this repository 
 	Add the following line to your custom variables.sqf if you don't have it already. It does not matter where it is located in the file.
 
 	```sqf
-	DayZ_SafeObjects = DayZ_SafeObjects + ["HeliHRescue"];
+	DayZ_SafeObjects set [count DayZ_SafeObjects, "HeliHRescue"];
 	```
-	
-	If you already have a customized DayZ_SafeObjects array, then add HeliRescue to the end of it like shown above.
 	
 	Add the following lines to your custom variables.sqf. It does not matter where these are placed in the file.
 	
@@ -180,6 +178,9 @@ Note: all of the files that need to be modified are included in this repository 
 	evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
 	evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
 	evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
+	evac_ChopperDisabledMarker = true; // Place a private map marker of the evac chopper's location
+	evac_ChopperUsemarkerTimeOut = true; // Have the local map marker timeout with the value in seconds below
+	evac_chopperMarkerTimeout = 180; // If evac_ChopperUsemarkerTimeOut = true; Then this will be the time in seconds that the marker will last before being deleted.
 	```
   
   	Add the entire block of code below this line if you don't already have it:
@@ -266,88 +267,95 @@ Note: all of the files that need to be modified are included in this repository 
 	};
 	```
   
-12. Repack your server PBO
+12. open ***dayz_server\init\server_functions.sqf***
 
-13. A complete set of the necessary BattlEye files have been provided in the BattlEye folder. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
+	Find this line:
+	
+	```sqf
+	spawn_vehicles = compile preprocessFileLineNumbers "\z\addons\dayz_server\compile\spawn_vehicles.sqf";
+	```
+	
+	Add the following line ***below*** it:
+	
+	```sqf
+	server_callEvacChopper = compile preprocessFileLineNumbers "\z\addons\dayz_server\compile\server_callEvacChopper.sqf";
+	```
+	
+13. Copy the file ***dayz_server\compile\server_callEvacChopper.sqf*** to the same directory in your server folder.
+
+14. Repack you server PBO.
+
+15. A complete set of the necessary BattlEye files have been provided in the BattlEye folder. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
 
 Note: These are to be used with the stock BattlEye filters that come with the 1.0.6.2 server files. If you are using a different set of filters then the numbers will not line up.
 
 1. publicvariable.txt
 
-   Add this to the end of line 2:
+	Add this to the end of line 2:
   
   	```sqf
-	!=PVDZE_EvacChopperFieldsUpdate
-	```
-2. remoteexec.txt
-
-   Add this to the end of line 2:
-  
-  	```sqf
-	!="true" !="evacZoneReached = true; evacChopper land 'LAND';" !=""
+	!=PVDZE_EvacChopperFieldsUpdate !=CallEvacChopper
 	```
 	
-3. waypointcondition.txt
+2. createvehicle.txt
 
-   Add this to the end of line 2:
+	Add this to the end of line 2:
   
   	```sqf
-	!="true"
+	!="HeliHRescue"
 	```
 	
-4. waypointstatements.txt
+3. scripts.txt
 
-   Add this to the end of line 2:
-  
-  	```sqf
-	!="evacZoneReached = true; evacChopper land 'LAND';" !=""
-	```
-	
-5. scripts.txt
-
-   Add this to the end of line 17
+	Add this to the end of line 17
   
   	```sqf
 	!"\\dayz_code\\init\\compiles.sqf\"\nif (!isDedicated) then {\ndiag_log \"Loading custom client com"
 	```
 	
-   Add this to the end of line 2:
+	Add this to the end of line 2:
   
   	```sqf
 	!=" (s_player_evacCall < 0) then {\ns_player_evacCall = player addAction [(\"<t color=\"\"#0000FF\"\">\" + (\"Call Evac-Chopper\") + \"</t>\")"
 	```
- 	
-   Add this to the end of line 11:
+	
+	Add this to the end of line 21:
  
   	```sqf
-	!="er setPosATL ([evacChopper] call FNC_GetPos);\n_finishMarker attachTo [evacChopper,[0,0,0]];\n};\nif (_dayTime > 18.5 && _dayTime <"
+	!="time = time;\n_chopperPos = getPos _evacChopper;\n_marker = createMarkerLocal [\"EvacChopper\",_chopperPos];\n_marker setMarkerColorL"
 	```
 	
-   Add this to the end of line 22:
+	Add this to the end of line 27:
+ 
+  	```sqf
+	!="me) > evac_chopperMarkerTimeout) then {_recovered = true; deleteMarkerLocal _marker; \"EVAC Chopper map marker deleted\" call dayz"
+	```
+	
+	Add this to the end of line 38:
   
   	```sqf
-	!="up = createGroup WEST;\nevacChopperPilot = evacChopperGroup createUnit [\"USMC_Soldier_pilot\", evacChopper, [], 0,\"LIEUTENANT\"];\nr"
+	!="_this select 4;};\n\nif (_flightStatus == \"Arrived\") exitWith\n{\nhintSilent parseText format [\"\n			<t size='1.15'	font='Bitstream'a"
 	```
 	
-   Add this to the end of line 38:
+	Add this to the end of line 58:
   
   	```sqf
-	!="format[\"%1m\", round (evacChopper distance _evacZone)];\n};\n};\n\nhintSilent parseText format [\"\n		<t size='1.15'	font='Bitstream'al"
+	!="= createMarkerLocal [\"EvacChopper\",_chopperPos];\n_marker setMarkerColorLocal \"ColorBlack\";\n_marker setMarkerTypeLocal \"mil_objec"
 	```
 	
-   Add this to the end of line 47:
+	Add this to the end of line 63:
   
   	```sqf
-	!="t;\nremoveallitems evacChopperPilot;\nevacChopperPilot removeAllEventHandlers \"HandleDamage\";\nevacChopperPilot addEventHandler [\"H"
+	!="ck\";\n_marker setMarkerTypeLocal \"mil_objective\";\n_marker setMarkerTextLocal \"EvacChopper\";\nwhile {!_recovered} do {\nif (!alive _"
 	```
 	
-   Add this to the end of line 68:
+	Add this to the end of line 64:
   
   	```sqf
-	!="Pos;\n_chopperStartPos = _getChopperStartPos;\n\n\nevacChopper setVehicleLock \"UNLOCKED\";\nevacChopperGroup = createGroup WEST;\nevacC"
+	!="rPos];\n_marker setMarkerColorLocal \"ColorBlack\";\n_marker setMarkerTypeLocal \"mil_objective\";\n_marker setMarkerTextLocal \"EvacCho"
 	```
 	
-   Add this to the end of line 72:
+	Add this to the end of line 72:
   
   	```sqf
 	!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""

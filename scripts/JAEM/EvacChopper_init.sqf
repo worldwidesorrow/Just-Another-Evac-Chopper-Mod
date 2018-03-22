@@ -32,6 +32,8 @@ if ((count _evacFields) > 0) then
 	} forEach _evacFields;
 };
 
+"EvacChopperClient" addPublicVariableEventHandler {(_this select 1) call EvacChopperFlightStatus};
+
 if (!evac_chopperUseClickActions) then { // if evac_chopperUseClickActions is true then this call chopper selfaction loop is disabled.
 	s_player_evacCall = -1;
 	evac_chopperCallFunctions = false;
