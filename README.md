@@ -6,7 +6,7 @@ I have upgraded this version to be ZSC and Deploy Anything compatible. ZSC can b
 
 ### Installation Instructions
 
-1. Click ***[Clone or Download](https://github.com/worldwidesorrow/JAEM-v1.5/archive/master.zip)*** the green button on the right side of the Github page.
+1. Click ***[Clone or Download](https://github.com/worldwidesorrow/JAEM-v1.5/archive/JAEM.zip)*** the green button on the right side of the Github page.
 
 	> Recommended PBO tool for all "pack", "repack", or "unpack" steps: ***[PBO Manager](http://www.armaholic.com/page.php?id=16369)***
   
@@ -179,8 +179,7 @@ Note: all of the files that need to be modified are included in this repository 
 	evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
 	evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
 	evac_ChopperDisabledMarker = true; // Place a private map marker of the evac chopper's location
-	evac_ChopperUsemarkerTimeOut = true; // Have the local map marker timeout with the value in seconds below
-	evac_chopperMarkerTimeout = 180; // If evac_ChopperUsemarkerTimeOut = true; Then this will be the time in seconds that the marker will last before being deleted.
+	evac_chopperMarkerTimeout = -1; // This will be the time in seconds that the marker will last before being deleted. (-1 = no timeout)
 	```
   
   	Add the entire block of code below this line if you don't already have it:
