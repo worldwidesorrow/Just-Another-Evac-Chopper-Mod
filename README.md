@@ -6,7 +6,7 @@ I have upgraded this version to be ZSC and Deploy Anything compatible. ZSC can b
 
 ### Installation Instructions
 
-1. Click ***[Clone or Download](https://github.com/worldwidesorrow/JAEM-v1.5/archive/JAEM.zip)*** the green button on the right side of the Github page.
+1. Click ***[Clone or Download](https://github.com/worldwidesorrow/JAEM-v1.5/archive/JAEM-v1.6.zip)*** the green button on the right side of the Github page.
 
 	> Recommended PBO tool for all "pack", "repack", or "unpack" steps: ***[PBO Manager](http://www.armaholic.com/page.php?id=16369)***
   
