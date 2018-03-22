@@ -7,7 +7,7 @@
 /*------------------------------------*/
 // Updated for DayZ Epoch 1.0.6.2 by JasonTM
 
-private ["_canceled","_cnt","_locationPlayer","_evacFieldID","_checkForChopper","_evacCallerUID","_evacFields","_heliHRescue","_routeFinished","_evacZone","_chopperStartPos","_getChopperStartPos","_evacZoneDistance","_startZoneWaypoint","_evacZoneWaypoint","_part","_damage","_hitpoints","_evacChopperFuel","_finishMarker","_evacZonePos","_dayTime"];
+private ["_chopperDir","_marker","_evacChopper","_canceled","_cnt","_locationPlayer","_evacFieldID","_checkForChopper","_evacCallerUID","_evacFields","_chopperPos","_evacZoneDistance","_part","_damage","_hitpoints","_evacChopperFuel"];
 
 if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = 1;};
 
@@ -66,7 +66,7 @@ if (!playerHasEvacField) exitWith {
 // Player has an evac field now check if a Chopper is on it
 _checkForChopper = playersEvacField nearEntities ["Helicopter", 10];
 if ((count _checkForChopper) > 0) then {
-	evacChopper = _checkForChopper select 0;
+	_evacChopper = _checkForChopper select 0;
 } else {
 	"Sorry but there is no Chopper on your Evac-Field" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
@@ -79,7 +79,7 @@ if ((count _checkForChopper) > 0) then {
 uiSleep 5;
 
 // Fuel check
-_evacChopperFuel = fuel evacChopper;
+_evacChopperFuel = fuel _evacChopper;
 if (_evacChopperFuel < 0.2) exitWith {
 	"Sorry but the Fuel of your Evac-Chopper is too low to fly to you" call dayz_rollingMessages;
 	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
@@ -88,9 +88,9 @@ if (_evacChopperFuel < 0.2) exitWith {
 
 // Damage check
 _part = "";
-_hitpoints = evacChopper call vehicle_getHitpoints;
+_hitpoints = _evacChopper call vehicle_getHitpoints;
 {			
-	_damage = [evacChopper,_x] call object_getHit;
+	_damage = [_evacChopper,_x] call object_getHit;
 	if(["Engine",_x,false] call fnc_inString) then {
 		_part = "PartEngine";
 	};
@@ -102,94 +102,72 @@ _hitpoints = evacChopper call vehicle_getHitpoints;
 	if (_damage >= 1 && (_part == "PartEngine" || _part == "PartVRotor")) then {
 		if(_part == "PartEngine") exitWith {
 			"Sorry but the Engine of your Evac-Chopper is too damaged to fly" call dayz_rollingMessages;
-			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-				evac_chopperInProgress = false;
+			_canceled = true;
 		};
 		if (_part == "PartVRotor") exitWith {
+			_canceled = true;
 			"Sorry but the Main-Rotor of your Evac-Chopper is too damaged to fly" call dayz_rollingMessages;
-			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-				evac_chopperInProgress = false;
 		};
 	};
 } forEach _hitpoints;
 
+if (_canceled) exitWith {if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;}; evac_chopperInProgress = false;};
+
+// Get needed positions
+_chopperPos = [_evacChopper] call FNC_GetPos;
+_chopperDir = getDir _evacChopper;
+
 // Fuel and damage check complete
 "Checks complete - Your Evac-Chopper is starting" call dayz_rollingMessages;
 
-// Create the Evacuation Zone Marker
-if (evac_chopperZoneMarker == 1) then {
-	_heliHRescue = "SmokeshellGreen" createVehicle ([player] call FNC_GetPos);
-	_heliHRescue setPosATL ([player] call FNC_GetPos);
-} else {
-	_heliHRescue = "HeliHRescue" createVehicle ([player] call FNC_GetPos);
-	_heliHRescue setDir (getDir player);
-	_heliHRescue setPosATL ([player] call FNC_GetPos);
-};
-
-//Reset of the checkpoint bool's
-evacZoneReached = false;
-_routeFinished = false;
-
-// Get needed positions
-_evacZonePos = [_heliHRescue] call FNC_GetPos;
-_evacZone = _evacZonePos;
-_getChopperStartPos = [evacChopper] call FNC_GetPos;
-_chopperStartPos = _getChopperStartPos;
-
-// Unlocking the Chopper and create the AI Pilot
-evacChopper setVehicleLock "UNLOCKED";
-evacChopperGroup = createGroup WEST;
-evacChopperPilot = evacChopperGroup createUnit ["USMC_Soldier_pilot", evacChopper, [], 0,"LIEUTENANT"];
-removeallweapons evacChopperPilot;
-removeallitems evacChopperPilot;
-evacChopperPilot removeAllEventHandlers "HandleDamage";
-evacChopperPilot addEventHandler ["HandleDamage", {false}];
-evacChopperPilot allowDamage false;
-evacChopperPilot assignAsDriver evacChopper;
-evacChopperPilot moveInDriver evacChopper;
-evacChopperPilot setSkill 1;
-evacChopperGroup setBehaviour "CARELESS";
-uiSleep 1;
-
-//Lock the Chopper again so noone can jump in
-evacChopper setVehicleLock "LOCKED";
-
-//Turn the Engine on and set fly height for the Pilot
-evacChopper engineOn true;
-evacChopper flyInHeight 200;
-
-//Create the Waypoint for the Evacuation Zone
-_startZoneWaypoint = evacChopperGroup addWaypoint [_chopperStartPos, 0];
-_startZoneWaypoint setWaypointBehaviour "CARELESS";
-_startZoneWaypoint setWaypointType "MOVE";
-_startZoneWaypoint setWaypointCompletionRadius 5;
-_startZoneWaypoint setWaypointSpeed "FULL";
-_evacZoneWaypoint = evacChopperGroup addWaypoint [_evacZone, 0];
-_evacZoneWaypoint setWaypointBehaviour "CARELESS";
-_evacZoneWaypoint setWaypointType "MOVE";
-_evacZoneWaypoint setWaypointCompletionRadius 5;
-_evacZoneWaypoint setWaypointSpeed  "FULL" ;
-_evacZoneWaypoint setWaypointStatements ["true", "evacZoneReached = true; evacChopper land 'LAND';"];
-_evacZoneWaypoint setWaypointCombatMode "BLUE";
-
-// Start loop. Checking for player still alive - Evac Zone reached - Chopper still alive
-while {alive player && !_routeFinished && alive evacChopper} do {
-	uiSleep 0.5;
-	// Still on his way
-	if (!evacZoneReached) then {
-		_evacZoneDistance = format["%1m", round (evacChopper distance _evacZone)];
-	} else {
-		//Arrived!
-		if ((([evacChopper] call FNC_GetPos) select 2) < 1) then {
-			waitUntil {uiSleep 0.5; !isEngineOn evacChopper};
-			_routeFinished = true;
-			_evacZoneDistance = "!!! ARRIVED !!!";
-			_evacZoneWaypoint = evacChopperGroup addWaypoint [_evacZone, 0];
-			_evacZoneWaypoint setWaypointType "GETOUT";
-		} else {
-			_evacZoneDistance = format["%1m", round (evacChopper distance _evacZone)];
+CallEvacChopper = [_evacChopper,[_chopperPos,_chopperDir],player,dayz_authKey];
+publicVariableServer "CallEvacChopper";
+	
+EvacChopperFlightStatus = {
+	private ["_flyHeight","_flySpeed","_evacZoneDistance","_flightStatus","_evacChopper"];
+	_flyHeight = _this select 0;
+	_flySpeed = _this select 1;
+	_evacZoneDistance = _this select 2;
+	_flightStatus = _this select 3;
+	if ((count _this) > 4) then {_evacChopper = _this select 4;};
+	
+	if (_flightStatus == "Arrived") exitWith
+	{
+		hintSilent parseText format ["
+			<t size='1.15'	font='Bitstream'align='center' 	color='#5882FA'>EVAC-Chopper</t>			<br/>
+			<t size='1'		font='Bitstream'align='center' 	color='#00FF00'>----------------------</t>	<br/>
+			<t size='1.15'	font='Bitstream'align='center' 	color='#FFBF00'>!!! ARRIVED !!!</t>			<br/>"
+		];
+		[_evacChopper] spawn {
+		private "_evacChopper";
+		_evacChopper = _this select 0;
+		waitUntil {uiSleep 1; (player distance _evacChopper) < 10};
+		PVDZE_veh_Lock = [_evacChopper,false];
+		publicVariable "PVDZE_veh_Lock";
+		"Owner detected, chopper unlocked" call dayz_rollingMessages;
 		};
 	};
+	
+	if (_flightStatus == "Crashed") exitWith
+	{
+		hintSilent parseText format ["
+			<t size='1.15'	font='Bitstream'align='center' 	color='#5882FA'>EVAC-Chopper</t>			<br/>
+			<t size='1'		font='Bitstream'align='center' 	color='#00FF00'>----------------------</t>	<br/>
+			<t size='1.15'	font='Bitstream'align='center' 	color='#FFBF00'>!!! CRASHED !!!</t>			<br/>"
+		];
+	};
+	
+	if (_flightStatus == "Disabled") exitWith
+	{
+		hintSilent parseText format ["
+			<t size='1.15'	font='Bitstream'align='center' 	color='#5882FA'>EVAC-Chopper</t>			<br/>
+			<t size='1'		font='Bitstream'align='center' 	color='#00FF00'>----------------------</t>	<br/>
+			<t size='1.15'	font='Bitstream'align='center' 	color='#FFBF00'>!!! DISABLED !!!</t>			<br/>"
+		];
+		// Create optional private map marker for the disabled chopper
+		if (evac_ChopperDisabledMarker) then {[_evacChopper] spawn DisabledChopperMarker;};
+	};
+	
 	// Showing a Hint-Box with information to the player about the Evac-Chopper - Height - Speed - Distance
 	hintSilent parseText format ["
 		<t size='1.15'	font='Bitstream'align='center' 	color='#5882FA'>EVAC-Chopper</t>			<br/>
@@ -197,100 +175,39 @@ while {alive player && !_routeFinished && alive evacChopper} do {
 		<t size='1'		font='Bitstream'align='left' 	color='#FFBF00'>Fly Height:</t>				<t size='1'		font='Bitstream'align='right'>%1</t><br/>
 		<t size='1'		font='Bitstream'align='left' 	color='#FFBF00'>Fly Speed:</t>				<t size='1'		font='Bitstream'align='right'>%2</t><br/>
 		<t size='1'		font='Bitstream'align='left' 	color='#FFBF00'>Distance:</t>				<t size='1'		font='Bitstream'align='right'>%3</t><br/>",
-		(round (([evacChopper] call FNC_GetPos) select 2)), (round (speed evacChopper)), _evacZoneDistance
+		_flyHeight, _flySpeed, _evacZoneDistance
 	];
 };
 
-// If Chopper got destroyed delete AI Pilot and his group, give a Hint to the player about the Crash and exit the script.
-if (!alive evacChopper) exitWith {
-	{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{uiSleep 0.5; count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	deleteVehicle _heliHRescue;
-	hintSilent parseText format ["
-		<t size='1.15'	font='Bitstream'align='center' 	color='#5882FA'>EVAC-Chopper</t>			<br/>
-		<t size='1'		font='Bitstream'align='center' 	color='#00FF00'>----------------------</t>	<br/>
-		<t size='1.15'	font='Bitstream'align='center' 	color='#FFBF00'>!!! CRASHED !!!</t>			<br/>"
-	];
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-		evac_chopperInProgress = false;
+DisabledChopperMarker = {
+	private ["_marker","_evacChopper","_recovered","_time","_chopperPos"];
+	_evacChopper = _this select 0;
+	if (evac_ChopperUsemarkerTimeOut) then {format["Your marker will disappear in %1 seconds, make note of EVAC Chopper's location",evac_chopperMarkerTimeout] call dayz_rollingMessages;};
+	"A private marker has been placed on the map for your disabled Evac Chopper" call dayz_rollingMessages;
+	_recovered = false;
+	_time = time;
+	_chopperPos = getPos _evacChopper;
+	_marker = createMarkerLocal ["EvacChopper",_chopperPos];
+	_marker setMarkerColorLocal "ColorBlack";
+	_marker setMarkerTypeLocal "mil_objective";
+	_marker setMarkerTextLocal "EvacChopper";
+	while {!_recovered} do {
+	if (evac_ChopperUsemarkerTimeOut) then {
+		if ((time - _time) > evac_chopperMarkerTimeout) then {_recovered = true; deleteMarkerLocal _marker; "EVAC Chopper map marker deleted" call dayz_rollingMessages;};
+	};
+	if ((player distance _chopperPos) < 10) then
+	{
+		_recovered = true;
+		deleteMarkerLocal _marker;
+		PVDZE_veh_Lock = [_evacChopper,false];
+		publicVariable "PVDZE_veh_Lock";
+		"Owner detected, Chopper unlocked, Marker Removed" call dayz_rollingMessages;
+	};
+	uiSleep 3;
+	};
 };
 
-// If player dies reset the Evac-Chopper to the start position, remove the AI Pilot and his group, delete the Evac-Zone Marker and exit the script.
-if (!alive player) exitWith {
-	deleteVehicle _heliHRescue;
-	evacChopper engineOn false;
-	evacChopper setPosATL _chopperStartPos;
-	evacChopper setVelocity [0,0,0.01];
-	{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-	_evacZoneWaypoint = evacChopperGroup addWaypoint [_chopperStartPos, 0];
-	_evacZoneWaypoint setWaypointType "GETOUT";
-	waitUntil{{uiSleep 0.5; _x in evacChopper} count units group evacChopperPilot == 0};
-	{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	evacChopper setVehicleLock "LOCKED";
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-		evac_chopperInProgress = false;
-};
 
-//Create Visible Marker
-_dayTime = dayTime;
-if (_dayTime > 6 && _dayTime < 18.5) then {
-	_finishMarker = "SmokeShellGreen" createVehicle ([evacChopper] call FNC_GetPos);
-	_finishMarker setPosATL ([evacChopper] call FNC_GetPos);
-	_finishMarker attachTo [evacChopper,[0,0,0]];
-};
-if (_dayTime > 18.5 && _dayTime < 6) then {
-	_finishMarker = "ARTY_Flare_Medium" createVehicle ([evacChopper] call FNC_GetPos);
-	_finishMarker setPosATL ([evacChopper] call FNC_GetPos);
-	_finishMarker attachTo [evacChopper, [0,0,0]];
-};
-
-//We delete the AI Pilot his group and the Evac-Zone Marker
-//Wait until Pilot left the Chopper
-waitUntil{{uiSleep 0.5; _x in evacChopper} count units group evacChopperPilot == 0};
-{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-deleteVehicle evacChopperPilot;
-
-//Wait until the pilot is deleted so we can delete the group
-waitUntil{uiSleep 0.5; count units group evacChopperPilot == 0};
-deleteGroup evacChopperGroup;
-
-//Delete the target zone marker
-deleteVehicle _heliHRescue;
-
-/*
-//If player dies reset the Evac-Chopper to the start position, remove the AI Pilot and his group, delete the Evac-Zone Marker and exit the script
-if (!alive player) exitWith {
-	deleteVehicle _finishMarker;
-	deleteVehicle _heliHRescue;
-	evacChopper setPosATL _chopperStartPos;
-	evacChopper setVelocity [0,0,0.01];
-	{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-	_evacZoneWaypoint = evacChopperGroup addWaypoint [_chopperStartPos, 0];
-	_evacZoneWaypoint setWaypointType "GETOUT";
-	waitUntil{{uiSleep 0.5; _x in evacChopper} count units group evacChopperPilot == 0};
-	{deleteWaypoint _x} forEach waypoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{uiSleep 0.5; count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	evacChopper setVehicleLock "LOCKED";
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-};
-*/
-
-//Wait until the player moves close to the Evac-Chopper
-waitUntil {uiSleep 0.5; (player distance evacChopper) < 10};
-
-//Player is close to the chopper so unlock it.
-"Owner detected - ACCESS GRANTED! Have a good Flight!" call dayz_rollingMessages;
-evacChopper setVehicleLock "UNLOCKED";
-
-//delete the Smoke/Flare marker
-deleteVehicle _finishMarker;
 
 //reset the action menu variable
 if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
