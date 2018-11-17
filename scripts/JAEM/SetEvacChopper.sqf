@@ -51,6 +51,7 @@ if (evac_chopperUseZSC && Z_singleCurrency) then {
 	if (_hasBriefcase < evac_chopperPrice) exitWith {
 		dayz_actionInProgress = false;
 		format["Making an Evac-Chopper costs %1 Full Briefcases", evac_chopperPrice] call dayz_rollingMessages;
+		breakOut "exit";
 	};
 };
 
