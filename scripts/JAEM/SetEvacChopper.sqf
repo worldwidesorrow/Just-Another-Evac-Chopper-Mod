@@ -9,7 +9,7 @@
 Updated for DayZ Epoch 1.0.6.2 with ZSC support by JasonTM
 */
 
-private ["_playerMoney","_finished","_sfx","_dis","_isowner","_isfriendly","_IsNearPlot","_distance","_plotcheck","_requireplot","_friendlies","_ownerID","_nearestPole","_canBuild","_vector","_allNearRescueFields","_locationPlayer","_cnt","_objID","_targetVehicle","_hasBriefcase","_location","_dir","_obj"];
+private ["_buildcheck","_playerMoney","_finished","_sfx","_dis","_isowner","_isfriendly","_IsNearPlot","_distance","_plotcheck","_requireplot","_friendlies","_ownerID","_nearestPole","_canBuild","_vector","_allNearRescueFields","_locationPlayer","_cnt","_objID","_targetVehicle","_hasBriefcase","_location","_dir","_obj"];
 
 if (dayz_actionInProgress) exitWith {localize "str_player_actionslimit" call dayz_rollingMessages;};
 dayz_actionInProgress = true;
@@ -81,18 +81,11 @@ if (_IsNearPlot == 0) then {
 	if (dayz_characterID == _ownerID) then {
 		_canBuild = true;
 	} else {
-		if (DZE_permanentPlot) then {
-			_buildcheck = [player, _nearestPole] call FNC_check_access;
-			_isowner = _buildcheck select 0;
-			_isfriendly = ((_buildcheck select 1) or (_buildcheck select 3));
-			if (_isowner || _isfriendly) then {
-				_canBuild = true;
-			};
-		} else {
-			_friendlies	= player getVariable ["friendlyTo",[]];
-			if (_ownerID in _friendlies) then {
-				_canBuild = true;
-			};
+		_buildcheck = [player, _nearestPole] call FNC_check_access;
+		_isowner = _buildcheck select 0;
+		_isfriendly = ((_buildcheck select 1) or (_buildcheck select 3));
+		if (_isowner || _isfriendly) then {
+			_canBuild = true;
 		};
 	};
 };
@@ -138,12 +131,8 @@ _vector = [(vectorDir _obj),(vectorUp _obj)];
 
 // Send publishing information to server
 _obj setVariable ["CharacterID",dayz_characterID,true];
-if (DZE_permanentPlot) then {
-	_obj setVariable ["ownerPUID",dayz_playerUID,true];
-	PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location,dayz_playerUID,_vector],[],player,dayz_authKey];
-} else {
-	PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location, _vector],[],player,dayz_authKey];
-};
+_obj setVariable ["ownerPUID",dayz_playerUID,true];
+PVDZ_obj_Publish = [dayz_characterID,_obj,[_dir,_location,dayz_playerUID,_vector],[],player,dayz_authKey];
 publicVariableServer "PVDZ_obj_Publish";
 PVDZE_EvacChopperFieldsUpdate = ["add",_obj];
 publicVariableServer "PVDZE_EvacChopperFieldsUpdate";
