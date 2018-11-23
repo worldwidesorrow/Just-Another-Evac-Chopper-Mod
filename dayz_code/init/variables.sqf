@@ -8,14 +8,13 @@ evac_chopperInProgress = false; //DO NOT CHANGE.
 
 // Evac Chopper Config Variables
 evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 briefcases). Players must have the briefcases in their inventory.
-evac_chopperUseZSC = false; // If you have ZSC installed you can set this to true and have players pay the amount below to set up an evac chopper.
 evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
+evac_chopperAllowRefund = true; // Allow players to get their money back when they remove an evac-chopper field.
 evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
 evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
 evac_chopperNeedRadio = 0; // 1 - Require player to have a radio in gear to call evac chopper | 0 - Doesn't require radio to call evac chopper.
 evac_chopperUseClickActions = false; // If you have Mudzereli's Deploy Anything installed and are going to use click actions to call the evac chopper, set this to true (disables call chopper self-action loop).
 evac_ChopperDisabledMarker = true; // Place a private map marker of the evac chopper's location
-evac_chopperMarkerTimeout = -1; // This will be the time in seconds that the marker will last before being deleted. (-1 = no timeout)
 
 if (isServer) then {"CallEvacChopper" addPublicVariableEventHandler {(_this select 1) spawn server_callEvacChopper;};};
 
@@ -46,14 +45,6 @@ dayz_resetSelfActions = {
 	s_player_attach_bomb = -1;
 	s_player_upgradestorage = -1;
 	s_player_Drinkfromhands = -1;
-	/*s_player_lockhouse = -1; //Vanilla base building currently not used in Epoch
-	s_player_unlockhouse = -1;
-	s_player_openGate = -1;
-	s_player_CloseGate = -1;
-	s_player_breakinhouse = -1;
-	s_player_setCode = -1;
-	s_player_BuildUnLock = -1;
-	s_player_BuildLock = -1;*/
 	
 	// EPOCH ADDITIONS
 	s_player_packvault = -1;
@@ -111,5 +102,6 @@ dayz_resetSelfActions = {
 	// Custom Below
 	
 	s_player_evacChopper_ctrl = -1;
+	s_player_evacCall = -1;
 };
 call dayz_resetSelfActions;

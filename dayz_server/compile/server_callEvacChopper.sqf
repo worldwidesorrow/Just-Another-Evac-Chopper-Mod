@@ -1,184 +1,141 @@
-private ["_chopperDir","_worldSpace","_disabledChopper","_pos","_chopperStartPos","_activatingPlayer","_clientKey","_playerUID","_exitReason","_routeFinished","_heliHRescue","_evacZonePos","_evacZoneDistance","_startZoneWaypoint","_evacZoneWaypoint","_dayTime","_finishMarker"];
+private ["_owner","_chopper","_pilot","_group","_returned","_dir","_worldSpace","_disabled","_pos","_startPos","_player","_clientKey","_playerUID","_exitReason","_routeFinished","_landingZone","_evacZonePos","_distance","_wp","_wp2","_flyHeight","_evacZoneReached"];
 
-evacChopper = _this select 0;
+_chopper = _this select 0;
 _worldSpace = _this select 1;
-_chopperStartPos = _worldSpace select 0;
-_chopperDir = _worldSpace select 1;
-_activatingPlayer = _this select 2;
+_startPos = _worldSpace select 0;
+_dir = _worldSpace select 1;
+_player = _this select 2;
 _clientKey = _this select 3;
-_playerUID = getPlayerUID _activatingPlayer;
-_pos = [_activatingPlayer] call FNC_GetPos;
+_playerUID = getPlayerUID _player;
+_pos = [_player] call FNC_GetPos;
+_owner = owner _player;
 
-_exitReason = [_this,"CallEvacChopper",_pos,_clientKey,_playerUID,_activatingPlayer] call server_verifySender;
+_exitReason = [_this,"Call_chopper",_pos,_clientKey,_playerUID,_player] call server_verifySender;
 if (_exitReason != "") exitWith {diag_log _exitReason};
 
-//Reset of the checkpoint bool's
-evacZoneReached = false;
+_evacZoneReached = false;
 _routeFinished = false;
-_disabledChopper = false;
+_disabled = false;
 
-
-// Create the Evacuation Zone Marker
 if (evac_chopperZoneMarker == 1) then {
-	_heliHRescue = "SmokeshellGreen" createVehicle ([_activatingPlayer] call FNC_GetPos);
-	_heliHRescue setPosATL ([_activatingPlayer] call FNC_GetPos);
+	_landingZone = "SmokeshellGreen" createVehicle ([_player] call FNC_GetPos);
+	_landingZone setPosATL ([_player] call FNC_GetPos);
 } else {
-	_heliHRescue = "HeliHRescue" createVehicle ([_activatingPlayer] call FNC_GetPos);
-	_heliHRescue setDir (getDir _activatingPlayer);
-	_heliHRescue setPosATL ([_activatingPlayer] call FNC_GetPos);
+	_landingZone = "HeliHRescue" createVehicle ([_player] call FNC_GetPos);
+	_landingZone setDir (getDir _player);
+	_landingZone setPosATL ([_player] call FNC_GetPos);
 };
 
-_evacZonePos = [_heliHRescue] call FNC_GetPos;
+_evacZonePos = [_landingZone] call FNC_GetPos;
 
-// Unlock the Chopper and create the AI Pilot
-evacChopper setVehicleLock "UNLOCKED";
-evacChopperGroup = createGroup WEST;
-evacChopperPilot = evacChopperGroup createUnit ["USMC_Soldier_pilot", evacChopper, [], 0,"LIEUTENANT"];
-removeAllWeapons evacChopperPilot;
-removeAllItems evacChopperPilot;
-evacChopperPilot removeAllEventHandlers "HandleDamage";
-evacChopperPilot addEventHandler ["HandleDamage", {false}];
-evacChopperPilot allowDamage false;
-evacChopperPilot assignAsDriver evacChopper;
-evacChopperPilot moveInDriver evacChopper;
-evacChopperPilot setSkill 1;
-evacChopperGroup setBehaviour "CARELESS";
-uiSleep 1;
+_group = createGroup EAST;
+_pilot = _group createUnit ["USMC_Soldier_pilot", _startPos, [], 0,"LIEUTENANT"];
+_pilot allowDamage false;
+_pilot assignAsDriver _chopper;
+_pilot moveInDriver _chopper;
+_pilot setSkill 1;
+_group setBehaviour "CARELESS";
+_group setCombatMode "BLUE";
+_chopper setVehicleLock "LOCKED";
+_chopper engineOn true;
+_chopper flyInHeight 75;
 
-//Lock the Chopper again so no one can jump in
-evacChopper setVehicleLock "LOCKED";
+_wp = _group addWaypoint [_evacZonePos, 0];
+_wp setWaypointBehaviour "CARELESS";
+_wp setWaypointType "MOVE";
+_wp setWaypointCompletionRadius 5;
+_wp setWaypointSpeed  "FULL" ;
 
-//Turn the Engine on and set fly height for the Pilot
-evacChopper engineOn true;
-evacChopper flyInHeight 75;
-
-//Create the Waypoint for the Evacuation Zone
-_startZoneWaypoint = evacChopperGroup addWaypoint [_chopperStartPos, 0];
-_startZoneWaypoint setWaypointBehaviour "CARELESS";
-_startZoneWaypoint setWaypointType "MOVE";
-_startZoneWaypoint setWaypointCompletionRadius 5;
-_startZoneWaypoint setWaypointSpeed "FULL";
-_evacZoneWaypoint = evacChopperGroup addWaypoint [_evacZonePos, 0];
-_evacZoneWaypoint setWaypointBehaviour "CARELESS";
-_evacZoneWaypoint setWaypointType "MOVE";
-_evacZoneWaypoint setWaypointCompletionRadius 5;
-_evacZoneWaypoint setWaypointSpeed  "FULL" ;
-_evacZoneWaypoint setWaypointStatements ["true", "evacZoneReached = true; evacChopper land 'LAND';"];
-_evacZoneWaypoint setWaypointCombatMode "BLUE";
-
-// Start loop. Checking for player still alive - Evac Zone reached - Chopper still alive - Chopper not disabled
-while {alive _activatingPlayer && !_routeFinished && alive evacChopper && !_disabledChopper} do {
+while {alive _player && {!_routeFinished} && {alive _chopper} && {!_disabled}} do {
 	uiSleep 0.5;
-	// Still on his way
-	if (!evacZoneReached) then {
-		// Flight status information
-		_evacZoneDistance = format["%1m", round (evacChopper distance _evacZonePos)];
-		_flyHeight = (round (([evacChopper] call FNC_GetPos) select 2));
+	
+	if ((_chopper distance _evacZonePos) < 150 && !_evacZoneReached) then {
+		_evacZoneReached = true; 
+		_chopper land 'LAND';
+	};
+	
+	if (!_evacZoneReached) then {
+		_distance = format["%1m", round (_chopper distance _evacZonePos)];
+		_flyHeight = (round (([_chopper] call FNC_GetPos) select 2));
 		
-		// If the helicopter becomes disabled, the pilot will land, exit the helicopter,
-		// and run towards the evac zone waypoint. This could cause the script to hang for a long
-		// time, so we exit the loop
-		if ({alive _x} count crew evacChopper == 0) exitWith {_disabledChopper = true;};
+		if ({alive _x} count crew _chopper == 0) exitWith {_disabled = true;};
 		
-		// Send the flight status information to the client to display in the monitor
-		EvacChopperClient = [_flyHeight, speed evacChopper, _evacZoneDistance,"InProgress"];
-		(owner _activatingPlayer) publicVariableClient "EvacChopperClient";
+		EvacChopperClient = [_flyHeight, speed _chopper, _distance, "InProgress"];
+		_owner publicVariableClient "EvacChopperClient";
 		
 	} else {
-		//Arrived!
-		if ((([evacChopper] call FNC_GetPos) select 2) < 1) then {
-			waitUntil {uiSleep 1; !isEngineOn evacChopper};
+
+		if ((([_chopper] call FNC_GetPos) select 2) < 1) exitWith {
 			_routeFinished = true;
+			moveOut _pilot;
 			
-			// Send the flight status information to the client to display in the monitor
-			EvacChopperClient = [0,0,0,"Arrived",evacChopper];
-			(owner _activatingPlayer) publicVariableClient "EvacChopperClient";
-			
-			_evacZoneWaypoint = evacChopperGroup addWaypoint [_evacZonePos, 0];
-			_evacZoneWaypoint setWaypointType "GETOUT";
-		} else {
-			_evacZoneDistance = format["%1m", round (evacChopper distance _evacZonePos)];
-			_flyHeight = (round (([evacChopper] call FNC_GetPos) select 2));
-			
-			// Send the flight status information to the client to display in the monitor
-			EvacChopperClient = [_flyHeight, speed evacChopper, _evacZoneDistance,"InProgress"];
-			(owner _activatingPlayer) publicVariableClient "EvacChopperClient";
+			EvacChopperClient = [0,0,0,"Arrived",_chopper];
+			_owner publicVariableClient "EvacChopperClient";
 		};
+		
+		_distance = format["%1m", round (_chopper distance _evacZonePos)];
+		_flyHeight = (round (([_chopper] call FNC_GetPos) select 2));
+		
+		EvacChopperClient = [_flyHeight, speed _chopper, _distance, "InProgress"];
+		_owner publicVariableClient "EvacChopperClient";
 	};
 };
 
-// Exit the script with hint if the chopper becomes disabled
-// Send chopper information for optional client-side marker
-if (_disabledChopper) exitWith {
-	{deleteWaypoint _x} forEach wayPoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{uiSleep 1; count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	deleteVehicle _heliHRescue;
+if (_disabled) exitWith {
+	deleteVehicle _landingZone;
+	deleteVehicle _pilot;
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
 	
-	// Send the flight status information to the client to display in the monitor
-	EvacChopperClient = [0,0,0,"Disabled",evacChopper];
-	(owner _activatingPlayer) publicVariableClient "EvacChopperClient";
+	EvacChopperClient = [0,0,0,"Disabled",_chopper];
+	_owner publicVariableClient "EvacChopperClient";
 };
 
-// If Chopper got destroyed delete AI Pilot and his group, give a Hint to the player about the Crash and exit the script.
-if (!alive evacChopper) exitWith {
-	{deleteWaypoint _x} forEach wayPoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{uiSleep 1; count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	deleteVehicle _heliHRescue;
+if (!alive _chopper) exitWith {
+	deleteVehicle _landingZone;
+	deleteVehicle _pilot;
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
 	
-	// Send the flight status information to the client to display in the monitor
 	EvacChopperClient = [0,0,0,"Crashed"];
-	(owner _activatingPlayer) publicVariableClient "EvacChopperClient";
+	_owner publicVariableClient "EvacChopperClient";
 };
 
-// If player dies, have the AI pilot fly back to start position, remove the AI Pilot and his group, delete the Evac-Zone Marker and exit the script.
-if (!alive _activatingPlayer) exitWith {
-	deleteVehicle _heliHRescue;
-	{deleteWaypoint _x} forEach wayPoints evacChopperGroup;
-	_evacZoneWaypoint = evacChopperGroup addWaypoint [_chopperStartPos, 0];
-	_evacZoneWaypoint setWaypointBehaviour "CARELESS";
-	_evacZoneWaypoint setWaypointType "MOVE";
-	_evacZoneWaypoint setWaypointCompletionRadius 5;
-	_evacZoneWaypoint setWaypointSpeed  "FULL" ;
-	_evacZoneWaypoint setWaypointStatements ["true","evacChopper land 'LAND';"];
-	_evacZoneWaypoint setWaypointCombatMode "BLUE";
-	_evacZoneWaypoint setWaypointType "GETOUT";
-	waitUntil{uiSleep 1; {_x in evacChopper} count units group evacChopperPilot == 0};
-	{deleteWaypoint _x} forEach wayPoints evacChopperGroup;
-	deleteVehicle evacChopperPilot;
-	waitUntil{uiSleep 1; count units group evacChopperPilot == 0};
-	deleteGroup evacChopperGroup;
-	evacChopper setDir _chopperDir;
-	evacChopper setPosATL _chopperStartPos;
+if (!alive _player) exitWith {
+	deleteVehicle _landingZone;
+	_returned = false;
+	
+	while {(count (wayPoints _group)) > 0} do
+	 {
+	  deleteWaypoint ((wayPoints _group) select 0);
+	 };
+	 
+	_wp2 = _group addWaypoint [_startPos, 0];
+	_wp2 setWaypointType "MOVE";
+	_wp2 setWaypointCompletionRadius 5;
+	_wp2 setWaypointSpeed "FULL";
+	
+	while {!_returned && {alive _chopper}} do {
+		
+		if ((_chopper distance _startPos) < 150 && {!_routeFinished}) then {
+			_routeFinished = true; 
+			_chopper land 'LAND';
+		};
+		
+		if ((([_chopper] call FNC_GetPos) select 2) < 1) then {
+			_returned = true;
+		};
+	};
+	
+	moveOut _pilot;
+	deleteVehicle _pilot;
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
+	_chopper setDir _dir;
+	_chopper setPosATL _startPos;
 };
-//Create Visible Marker
-_dayTime = dayTime;
-if (_dayTime > 6 && _dayTime < 18.5) then {
-	_finishMarker = "SmokeShellGreen" createVehicle ([evacChopper] call FNC_GetPos);
-	_finishMarker setPosATL ([evacChopper] call FNC_GetPos);
-	_finishMarker attachTo [evacChopper,[0,0,0]];
-};
-if (_dayTime > 18.5 && _dayTime < 6) then {
-	_finishMarker = "ARTY_Flare_Medium" createVehicle ([evacChopper] call FNC_GetPos);
-	_finishMarker setPosATL ([evacChopper] call FNC_GetPos);
-	_finishMarker attachTo [evacChopper, [0,0,0]];
-};
 
-//Delete the target zone marker
-deleteVehicle _heliHRescue;
-
-//delete the Smoke/Flare marker
-deleteVehicle _finishMarker;
-
-//We delete the AI Pilot his group and the Evac-Zone Marker
-//Wait until Pilot left the Chopper
-waitUntil{uiSleep 1; {_x in evacChopper} count units group evacChopperPilot == 0};
-{deleteWaypoint _x} forEach wayPoints evacChopperGroup;
-deleteVehicle evacChopperPilot;
-
-//Wait until the pilot is deleted so we can delete the group
-waitUntil{uiSleep 1; count units group evacChopperPilot == 0};
-deleteGroup evacChopperGroup;
+deleteVehicle _landingZone;
+deleteVehicle _pilot;
+waitUntil{uiSleep 1; count units group _pilot == 0};
+deleteGroup _group;
