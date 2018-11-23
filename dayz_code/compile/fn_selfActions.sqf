@@ -217,6 +217,25 @@ if (_isPZombie) then {
 	};
 };
 
+// Call EvacChopper
+if (playerHasEvacField && {!evac_chopperUseClickActions}) then {
+	if (player distance playersEvacField >= evac_chopperMinDistance && {!evac_chopperInProgress} && {isNull cursorTarget} && {speed player < 1} && {!_inVehicle}) then {
+		if (evac_chopperNeedRadio == 1) then {
+			if ("ItemRadio" in (items player)) then {
+				if (s_player_evacCall < 0) then {
+					s_player_evacCall = player addAction [("<t color=""#0000FF"">" + ("Call Evac-Chopper") + "</t>"),"scripts\JAEM\CallEvacChopper.sqf",[],-1000,false,false,"",""];
+				};
+			};
+		} else {
+			if (s_player_evacCall < 0) then {
+				s_player_evacCall = player addAction [("<t color=""#0000FF"">" + ("Call Evac-Chopper") + "</t>"),"scripts\JAEM\CallEvacChopper.sqf",[],-1000,false,false,"",""];
+			};
+		};
+	} else {
+		player removeAction s_player_evacCall;
+		s_player_evacCall = -1;
+	};
+};
 // Increase distance only if AIR or SHIP
 _allowedDistance = if ((_cursorTarget isKindOf "Air") or (_cursorTarget isKindOf "Ship")) then {8} else {4};
 
@@ -706,7 +725,7 @@ if (!isNull _cursorTarget && !_inVehicle && !_isPZombie && (player distance _cur
 					s_player_lockUnlock_crtl = 1;
 				};
 			};
-			//Evac Chopper
+			// EvacChopper
 			if (s_player_evacChopper_ctrl < 0) then {
 				private ["_setEvac","_clearEvac"];
 				if (_hasKey || _oldOwner) then {
@@ -721,13 +740,14 @@ if (!isNull _cursorTarget && !_inVehicle && !_isPZombie && (player distance _cur
 						s_player_evacChopper_ctrl = 1;
 					};
 				};
+			} else {
+				{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
+				s_player_evacChopper_ctrl = -1;
 			};
 		};
 	} else {
 		{player removeAction _x} count s_player_lockunlock;s_player_lockunlock = [];
 		s_player_lockUnlock_crtl = -1;
-		{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
-		s_player_evacChopper_ctrl = -1;
 	};
 	
 	// gear access on surrendered player
