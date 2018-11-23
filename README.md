@@ -373,7 +373,7 @@ Note: These are to be used with the stock BattlEye filters that come with the 1.
 	
 ***Deploy Anything Option***
 
-If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then   find this variable in your custom variables.sqf
+1. If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then   find this variable in your custom variables.sqf
   
    Find this variable
   
