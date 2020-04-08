@@ -58,7 +58,7 @@ Note: all of the files that need to be modified are included in this repository 
 	[] execVM "dayz_code\compile\remote_message.sqf";
 	```
 
-7. If you already have a custom fn_selfActions.sqf in directory dayz_code\init, open that file. If not you should have copied the one over from the download in step 5.
+7. If you already have a custom fn_selfActions.sqf in directory dayz_code\compile, open that file. If not you should have copied the one over from the download in step 5.
 
 	Find this block of code:
 	
