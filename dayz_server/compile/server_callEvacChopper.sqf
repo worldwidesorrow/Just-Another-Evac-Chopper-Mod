@@ -1,3 +1,11 @@
+/*------------------------------------------*/
+/* JAEM                               		*/
+/* Just another Chopper-Evac Mod v1.6 		*/
+/* JasonTM									*/
+/* Updated for DayZ Epoch 1.0.7+ by JasonTM */
+/* Last update: 05-30-2021           		*/
+/*------------------------------------------*/
+
 private ["_owner","_chopper","_pilot","_group","_returned","_dir","_worldSpace","_disabled","_pos","_startPos","_player","_clientKey","_playerUID","_exitReason","_routeFinished","_landingZone","_evacZonePos","_distance","_wp","_wp2","_flyHeight","_evacZoneReached"];
 
 _chopper = _this select 0;

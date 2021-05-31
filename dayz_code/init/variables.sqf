@@ -1,6 +1,6 @@
 DayZ_SafeObjects set [count DayZ_SafeObjects, "HeliHRescue"];
 
-// Evac Chopper Static Variables
+// Evac Chopper Variables
 playerHasEvacField = false; // DO NOT CHANGE.
 playersEvacField = objNull; // DO NOT CHANGE.
 s_player_evacChopper = []; // DO NOT CHANGE.
@@ -8,7 +8,7 @@ evac_chopperInProgress = false; //DO NOT CHANGE.
 
 // Evac Chopper Config Variables
 evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper (between 1-12 briefcases). Players must have the briefcases in their inventory.
-evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
+evac_chopperPriceZSC = 10000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
 evac_chopperAllowRefund = true; // Allow players to get their money back when they remove an evac-chopper field.
 evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
 evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
@@ -18,7 +18,7 @@ evac_ChopperDisabledMarker = true; // Place a private map marker of the evac cho
 
 if (isServer) then {"CallEvacChopper" addPublicVariableEventHandler {(_this select 1) spawn server_callEvacChopper;};};
 
-//Player self-action handles
+//Player self-action handles - this function gets called by player_humanityMorph
 dayz_resetSelfActions = {
 	s_player_equip_carry = -1;
 	s_player_fire = -1;
@@ -42,11 +42,8 @@ dayz_resetSelfActions = {
 	s_player_fishing_veh = -1;
 	s_player_gather = -1;
 	s_player_destroytent = -1;
-	s_player_attach_bomb = -1;
-	s_player_upgradestorage = -1;
-	s_player_Drinkfromhands = -1;
-	
-	// EPOCH ADDITIONS
+
+	// Epoch Additions
 	s_player_packvault = -1;
 	s_player_lockvault = -1;
 	s_player_unlockvault = -1;
@@ -68,7 +65,7 @@ dayz_resetSelfActions = {
 	s_player_barkdog = -1;
 	s_player_warndog = -1;
 	s_player_followdog = -1;
-	s_player_information = -1;	
+	s_player_information = -1;
 	s_player_fuelauto = -1;
 	s_player_fuelauto2 = -1;
 	s_player_fillgen = -1;
@@ -87,20 +84,23 @@ dayz_resetSelfActions = {
 	s_player_lockUnlockInside_ctrl = -1;
 	s_player_toggleSnap = -1;
 	s_player_toggleSnapSelect = -1;
-	s_player_toggleSnapSelectPoint = [];
 	snapActions = -1;
 	s_player_plot_boundary = -1;
 	s_player_plotManagement = -1;
 	s_player_toggleDegree = -1;
-	s_player_toggleDegrees=[];
 	degreeActions = -1;
 	s_player_toggleVector = -1;
-	s_player_toggleVectors=[];
 	vectorActions = -1;
 	s_player_manageDoor = -1;
-	
-	// Custom Below
-	
+	s_player_hide_body = -1;
+	s_player_changeDoorCode = -1;
+	s_player_changeVaultCode = -1;
+	s_givemoney_dialog = -1;
+	s_bank_dialog = -1;
+	s_bank_dialog1 = -1;
+	s_bank_dialog2 = -1;
+	s_bank_dialog3 = -1;
+	s_player_checkWallet = -1;
 	s_player_evacChopper_ctrl = -1;
 	s_player_evacCall = -1;
 };

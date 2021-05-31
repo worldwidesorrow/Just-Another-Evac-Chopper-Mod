@@ -4,96 +4,77 @@
 /* OtterNas3								*/
 /* 01/14/2014                         		*/
 /* Updated for DayZ Epoch 1.0.6+ by JasonTM */
-/* Last update: 11/20/2018            		*/
+/* Updated for DayZ Epoch 1.0.7+ by JasonTM */
+/* Last update: 05-30-2021           		*/
 /*------------------------------------------*/
 
-private ["_name","_chopperDir","_marker","_evacChopper","_cnt","_locationPlayer","_evacFieldID","_checkForChopper","_evacCallerUID","_evacFields","_chopperPos","_evacZoneDistance","_part","_damage","_hitpoints","_evacChopperFuel"];
+local _name = localize "STR_CL_EC_NAME";
+local _cnt = 5;
+local _locationPlayer = [player] call FNC_GetPos;
 
-_name = localize "STR_CL_EC_NAME";
-_cnt = 5;
-_locationPlayer = [player] call FNC_GetPos;
-
-if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = 1;};
+if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = -1;};
 
 if(evac_chopperInProgress) exitWith {format["%1 %2",_name, localize "STR_EPOCH_PLAYER_96"] call dayz_rollingMessages;};
+evac_chopperInProgress = true;
 
 if (!playerHasEvacField) exitWith {
 	format[localize "STR_EPOCH_PLAYER_118",_name] call dayz_rollingMessages;
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+	evac_chopperInProgress = false;
 };
 
 if (evac_chopperUseClickActions && ((player distance playersEvacField) < evac_chopperMinDistance)) exitWith {
 	format[localize "STR_CL_EC_MINIMUM_DISTANCE",evac_chopperMinDistance,_name] call dayz_rollingMessages;
+	evac_chopperInProgress = false;
 };
 
-_checkForChopper = playersEvacField nearEntities ["Helicopter", 10];
+_NearChoppers = playersEvacField nearEntities ["Helicopter", 10];
 
-if (count _checkForChopper == 0) exitWith {
+if (count _NearChoppers == 0) exitWith {
 	format[localize "STR_EPOCH_PLAYER_118",_name] call dayz_rollingMessages;
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+	evac_chopperInProgress = false;
 };
 
-_evacChopper = _checkForChopper select 0;
-
-evac_chopperInProgress = true;
+local _evacChopper = _NearChoppers select 0;
 
 /* 5 seconds timeout to cancel a call on accident */
 for "_p" from 1 to _cnt do
 {
 	systemChat format [localize "STR_CL_EC_COUNTDOWN",_name,_cnt];
 	if (player distance _locationPlayer > 0.2) exitWith {
-		if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
 		evac_chopperInProgress = false;
 	};
 	uiSleep 1;
 	_cnt = _cnt - 1;
 };
 
-if (!evac_chopperInProgress) exitWith {};
-
 // Fuel check
-_fuel = fuel _evacChopper;
-if (_fuel < 0.2) exitWith {
+if ((fuel _evacChopper) < 0.2) exitWith {
 	localize "STR_CL_EC_UNABLETOEVAC" call dayz_rollingMessages;
-	if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
-		evac_chopperInProgress = false;
+	evac_chopperInProgress = false;
 };
 
 // Damage check
-_part = "";
-_hitpoints = _evacChopper call vehicle_getHitpoints;
 {			
-	_damage = [_evacChopper,_x] call object_getHit;
-	
-	if(["Engine",_x,false] call fnc_inString) then {
-		_part = "PartEngine";
-	};
-	
-	if(["HRotor",_x,false] call fnc_inString) then {
-		_part = "PartVRotor";
-	};
-	
-	if (_damage >= .9 && (_part == "PartEngine" || _part == "PartVRotor")) exitWith {
+	if ((([_evacChopper,_x] call object_getHit) select 0) >= .9 && ((["Engine",_x,false] call fnc_inString) || (["HRotor",_x,false] call fnc_inString))) exitWith {
 		localize "STR_CL_EC_UNABLETOEVAC" call dayz_rollingMessages;
-		if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
 		evac_chopperInProgress = false;
 	};
-} forEach _hitpoints;
+} count (_evacChopper call vehicle_getHitpoints);
 
 if (!evac_chopperInProgress) exitWith {};
 
-_chopperPos = [_evacChopper] call FNC_GetPos;
-_chopperDir = getDir _evacChopper;
+local _chopperPos = [_evacChopper] call FNC_GetPos;
+local _chopperDir = getDir _evacChopper;
 
 CallEvacChopper = [_evacChopper,[_chopperPos,_chopperDir],player,dayz_authKey];
 publicVariableServer "CallEvacChopper";
 	
 EvacChopperFlightStatus = {
-	private ["_flyHeight","_flySpeed","_evacZoneDistance","_flightStatus","_evacChopper"];
-	_flyHeight = _this select 0;
-	_flySpeed = _this select 1;
-	_evacZoneDistance = _this select 2;
-	_flightStatus = _this select 3;
+	local _flyHeight = _this select 0;
+	local _flySpeed = _this select 1;
+	local _evacZoneDistance = _this select 2;
+	local _flightStatus = _this select 3;
+	local _evacChopper = objNull;
 	if ((count _this) > 4) then {_evacChopper = _this select 4;};
 	
 	if (_flightStatus == "Arrived") exitWith {
@@ -105,9 +86,8 @@ EvacChopperFlightStatus = {
 			localize "STR_CL_EC_ARRIVED"
 		];
 		_evacChopper spawn {
-			private ["_evacChopper","_marker"];
-			_evacChopper = _this;
-			
+			local _evacChopper = _this;
+			local _marker = objNull;
 			if (sunOrMoon == 1) then {
 				_marker = "SmokeShellGreen" createVehicle ([_evacChopper] call FNC_GetPos);
 				_marker setPosATL ([_evacChopper] call FNC_GetPos);
@@ -165,21 +145,16 @@ EvacChopperFlightStatus = {
 };
 
 DisabledChopperMarker = {
-	private ["_marker","_evacChopper","_recovered","_time","_chopperPos"];
-	_evacChopper = _this;
-	
-	format["STR_CL_EC_MARKER",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
-	
-	_recovered = false;
-	_time = time;
-	_chopperPos = getPos _evacChopper;
-	_marker = createMarkerLocal ["EvacChopper",_chopperPos];
+	local _evacChopper = _this;
+	local _recovered = false;
+	local _chopperPos = getPos _evacChopper;
+	local _marker = createMarkerLocal ["EvacChopper",_chopperPos];
 	_marker setMarkerColorLocal "ColorBlack";
 	_marker setMarkerTypeLocal "mil_objective";
 	_marker setMarkerTextLocal (localize "STR_CL_EC_NAME");
+	format["STR_CL_EC_MARKER",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
 	
 	while {!_recovered} do {
-		
 		if ((player distance _chopperPos) < 10) then {
 			_recovered = true;
 			deleteMarkerLocal _marker;
@@ -188,16 +163,8 @@ DisabledChopperMarker = {
 			publicVariable "PVDZE_veh_Lock";
 			
 			format[localize "STR_BLD_UNLOCKED",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
-			
-			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
 			evac_chopperInProgress = false;	
 		};
 	uiSleep 3;
 	};
 };
-
-
-//Thats it for the Evacutaion process
-//Hope you enjoyed it :)
-//Moo,
-//Otter

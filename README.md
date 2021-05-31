@@ -1,7 +1,7 @@
 Just Another Evac-Chopper Mod v1.6
 ==============
 
-This is an updated version of JAEM by OtterNas3. This version is updated to be compatible with DayZ Epoch 1.0.6.2.
+This is an updated version of JAEM by OtterNas3. This version is updated to be compatible with DayZ Epoch 1.0.7.
 I have upgraded this version to be ZSC and Deploy Anything compatible. ZSC can be used as an option to pay for the creation of an evac chopper and Mudzereli's right-click actions can be used to call the evac chopper.
 
 ### Installation Instructions
@@ -54,8 +54,7 @@ Note: all of the files that need to be modified are included in this repository 
   	Add the following lines ***above*** it. You might already have the remote_messages line from another mod:
 	
 	```sqf
-	[] execVM "scripts\JAEM\EvacChopper_init.sqf";
-	[] execVM "dayz_code\compile\remote_message.sqf";
+	execVM "scripts\JAEM\EvacChopper_init.sqf";
 	```
 
 7. If you already have a custom fn_selfActions.sqf in directory dayz_code\compile, open that file. If not you should have copied the one over from the download in step 5.
@@ -92,12 +91,12 @@ Note: all of the files that need to be modified are included in this repository 
 	};
 	```
 	
-	Add the following block of code below it ***below*** it:
+	Add the following block of code below it ***below*** it. Note: if you are using the deploy anything option you do not need to use the code directly below.
 	
 	```sqf
 	// Call EvacChopper
 	if (playerHasEvacField && {!evac_chopperUseClickActions}) then {
-		if (player distance playersEvacField >= evac_chopperMinDistance && {!evac_chopperInProgress} && {isNull cursorTarget} && {speed player < 1} && {!_inVehicle}) then {
+		if (player distance playersEvacField >= evac_chopperMinDistance && !evac_chopperInProgress && {isNull cursorTarget} && {speed player < 1} && {!_inVehicle}) then {
 			if (evac_chopperNeedRadio == 1) then {
 				if ("ItemRadio" in (items player)) then {
 					if (s_player_evacCall < 0) then {
@@ -119,40 +118,103 @@ Note: all of the files that need to be modified are included in this repository 
    	Find this block of code:
 
 	```sqf
-	} else {
-		if (_hasKey || _oldOwner) then {
-		_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
-		s_player_lockunlock set [count s_player_lockunlock,_lock];
-		s_player_lockUnlock_crtl = 1;
+	// Allow Owner to lock and unlock vehicle
+	if (_player_lockUnlock_crtl) then {
+		if (s_player_lockUnlock_crtl < 0) then {
+			local _totalKeys = call epoch_tempKeys;
+			local _temp_keys = _totalKeys select 0;
+			local _temp_keys_names = _totalKeys select 1;
+			local _hasKey = _characterID in _temp_keys;
+			local _oldOwner = (_characterID == _uid);
+			local _unlock = [];
+			
+			if (_isLocked) then {
+				if (_hasKey || _oldOwner) then {
+					_unlock = player addAction [format[localize "STR_EPOCH_ACTIONS_UNLOCK",_text], "\z\addons\dayz_code\actions\unlock_veh.sqf",[_cursorTarget,(_temp_keys_names select (_temp_keys find _characterID))], 2, true, true];
+					s_player_lockunlock set [count s_player_lockunlock,_unlock];
+					s_player_lockUnlock_crtl = 1;
+				} else {
+					if (_hasHotwireKit) then {
+						_unlock = player addAction [format[localize "STR_EPOCH_ACTIONS_HOTWIRE",_text], "\z\addons\dayz_code\actions\hotwire_veh.sqf",_cursorTarget, 2, true, true];
+					} else {
+						_unlock = player addAction [format["<t color='#ff0000'>%1</t>",localize "STR_EPOCH_ACTIONS_VEHLOCKED"], "",_cursorTarget, 2, false, true];
+					};
+					s_player_lockunlock set [count s_player_lockunlock,_unlock];
+					s_player_lockUnlock_crtl = 1;
+				};
+			} else {
+				if (_hasKey || _oldOwner) then {
+					_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
+					s_player_lockunlock set [count s_player_lockunlock,_lock];
+					s_player_lockUnlock_crtl = 1;
+				};
+			};
 		};
+	} else {
+		{player removeAction _x} count s_player_lockunlock;s_player_lockunlock = [];
+		s_player_lockUnlock_crtl = -1;
 	};
 	```
 	
-  	Add the following block of code below it ***below*** it:
+  	Replace the entire block of code with the following:
 	
 	```sqf
-	// EvacChopper
-	if (s_player_evacChopper_ctrl < 0) then {
-		private ["_setEvac","_clearEvac"];
-		if (_hasKey || _oldOwner) then {
-			if ((_cursorTarget isKindOf "Helicopter") && (!playerHasEvacField)) then {
-				_setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,false];
-				s_player_evacChopper set [count s_player_evacChopper,_setEvac];
-				s_player_evacChopper_ctrl = 1;
+	// Allow Owner to lock and unlock vehicle
+	if (_player_lockUnlock_crtl) then {
+		local _totalKeys = call epoch_tempKeys;
+		local _temp_keys = _totalKeys select 0;
+		local _temp_keys_names = _totalKeys select 1;
+		local _hasKey = _characterID in _temp_keys;
+		local _oldOwner = (_characterID == _uid);
+		if (s_player_lockUnlock_crtl < 0) then {
+			local _unlock = [];
+			
+			if (_isLocked) then {
+				if (_hasKey || _oldOwner) then {
+					_unlock = player addAction [format[localize "STR_EPOCH_ACTIONS_UNLOCK",_text], "\z\addons\dayz_code\actions\unlock_veh.sqf",[_cursorTarget,(_temp_keys_names select (_temp_keys find _characterID))], 2, true, true];
+					s_player_lockunlock set [count s_player_lockunlock,_unlock];
+					s_player_lockUnlock_crtl = 1;
+				} else {
+					if (_hasHotwireKit) then {
+						_unlock = player addAction [format[localize "STR_EPOCH_ACTIONS_HOTWIRE",_text], "\z\addons\dayz_code\actions\hotwire_veh.sqf",_cursorTarget, 2, true, true];
+					} else {
+						_unlock = player addAction [format["<t color='#ff0000'>%1</t>",localize "STR_EPOCH_ACTIONS_VEHLOCKED"], "",_cursorTarget, 2, false, true];
+					};
+					s_player_lockunlock set [count s_player_lockunlock,_unlock];
+					s_player_lockUnlock_crtl = 1;
+				};
+			} else {
+				if (_hasKey || _oldOwner) then {
+					_lock = player addAction [format[localize "STR_EPOCH_ACTIONS_LOCK",_text], "\z\addons\dayz_code\actions\lock_veh.sqf",_cursorTarget, 1, true, true];
+					s_player_lockunlock set [count s_player_lockunlock,_lock];
+					s_player_lockUnlock_crtl = 1;
+				};
 			};
-			if ((_cursorTarget isKindOf "Helicopter") && playerHasEvacField && (player distance playersEvacField < 10)) then {
-				_clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,false];
-				s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
-				s_player_evacChopper_ctrl = 1;
+		};
+		// EvacChopper
+		if (s_player_evacChopper_ctrl < 0) then {
+			if ((_cursorTarget isKindOf "Helicopter") && (_hasKey || _oldOwner) && !evac_chopperInProgress) then {
+				if (!playerHasEvacField) then {
+					local _setEvac = player addAction [("<t color=""#0000FF"">" + ("Set Evac-Chopper") + "</t>"),"scripts\JAEM\SetEvacChopper.sqf",_cursorTarget,3,false,true];
+					s_player_evacChopper set [count s_player_evacChopper,_setEvac];
+					s_player_evacChopper_ctrl = 1;
+				};
+				if (playerHasEvacField && (player distance playersEvacField < 10)) then {
+					local _clearEvac = player addAction [("<t color=""#0000FF"">" + ("Clear Evac-Chopper") + "</t>"),"scripts\JAEM\ClearEvacChopper.sqf",_cursorTarget,4,false,true];
+					s_player_evacChopper set [count s_player_evacChopper,_clearEvac];
+					s_player_evacChopper_ctrl = 1;
+				};
 			};
 		};
 	} else {
+		{player removeAction _x} count s_player_lockunlock;s_player_lockunlock = [];
+		s_player_lockUnlock_crtl = -1;
 		{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
 		s_player_evacChopper_ctrl = -1;
 	};
 	```
   
-  	Find this line (around line 1104):
+  	Find this line (around line 1050):
 
 	```sqf
 	s_player_lockUnlock_crtl = -1;
@@ -172,7 +234,7 @@ Note: all of the files that need to be modified are included in this repository 
 	```sqf
 	DayZ_SafeObjects set [count DayZ_SafeObjects, "HeliHRescue"];
 	
-	// Evac Chopper Static Variables
+	// Evac Chopper Variables
 	playerHasEvacField = false; // DO NOT CHANGE.
 	playersEvacField = objNull; // DO NOT CHANGE.
 	s_player_evacChopper = []; // DO NOT CHANGE.
@@ -180,7 +242,7 @@ Note: all of the files that need to be modified are included in this repository 
 
 	// Evac Chopper Config Variables
 	evac_chopperPrice = 1; // This is the price players pay in full briefcases to set up an evac chopper.
-	evac_chopperPriceZSC = 100000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
+	evac_chopperPriceZSC = 10000; // Price for evac chopper if you have ZSC Installed and evac_chopperUseZSC set to true.
 	evac_chopperAllowRefund = false; // Allow players to get their money back when they remove an evac-chopper field.
 	evac_chopperMinDistance = 500; // Minimum distance for player to call evac chopper. Do not set this lower than 500.
 	evac_chopperZoneMarker = 0; // Evac zone marker type (0 = Landingpad | 1 = Smoke).
@@ -211,16 +273,15 @@ Note: all of the files that need to be modified are included in this repository 
     ```sqf
     	fnc_usec_selfactions = compile preprocessFileLineNumbers "dayz_code\compile\fn_selfActions.sqf";
   	```
-    
-10. This mod is dependent on the Epoch community stringtable. Download the stringtable ***[here](https://github.com/oiad/communityLocalizations/)*** and place file stringTable.xml in the root of your mission folder.
-11. Repack your mission PBO.
 
-12. Unpack your server PBO and open ***dayz_server\system\server_monitor.sqf***
+10. Repack your mission PBO.
+
+11. Unpack your server PBO and open ***dayz_server\system\server_monitor.sqf***
 
 	Find this line:
 
 	```sqf
-	_DZE_VehObjects = [];
+	dayz_serverIDMonitor = [];
 	```
 	
 	Add the following line ***below*** it:
@@ -232,15 +293,13 @@ Note: all of the files that need to be modified are included in this repository 
   	Find this line:
 
 	```sqf
-	if (_isDZ_Buildable || {(_isSafeObject && !_isTrapItem)}) then {
+	if (_type == "Base_Fire_DZ") then {_object spawn base_fireMonitor;};
 	```
 	
-	Add the following block of code ***above*** it:
+	Add the following line ***below*** it:
 	
 	```sqf
-	if ((typeOf _object) == "HeliHRescue") then {
-				PVDZE_EvacChopperFields set [count PVDZE_EvacChopperFields, _object];
-			};
+	if (_type == "HeliHRescue") then {PVDZE_EvacChopperFields set [count PVDZE_EvacChopperFields, _object];};
 	```
   
   	Find this line:
@@ -252,32 +311,18 @@ Note: all of the files that need to be modified are included in this repository 
 	Add the following block of code ***below*** it:
 	
 	```sqf
-	if (isServer && (isNil "EvacServerPreload")) then {
-    		publicVariable "PVDZE_EvacChopperFields";
-    
-   	 ON_fnc_evacChopperFieldsUpdate = {
-        	private ["_action","_targetField"];
-        	_action = _this select 0;
-        	_targetField = _this select 1;
-        
-        if (_action == "add") then {
-            PVDZE_EvacChopperFields = PVDZE_EvacChopperFields + [_targetField];
-        };
-        
-        if (_action == "rem") then {
-            PVDZE_EvacChopperFields = PVDZE_EvacChopperFields - [_targetField];
-        };
-        
-        publicVariable "PVDZE_EvacChopperFields";
-    	};
-
-    	"PVDZE_EvacChopperFieldsUpdate" addPublicVariableEventHandler {(_this select 1) spawn ON_fnc_evacChopperFieldsUpdate};
-
-    	EvacServerPreload = true;
+	publicVariable "PVDZE_EvacChopperFields";
+	ON_fnc_evacChopperFieldsUpdate = {
+		local _action = _this select 0;
+		local _field = _this select 1;
+		if (_action == "add") then {PVDZE_EvacChopperFields = PVDZE_EvacChopperFields + [_field];};
+		if (_action == "rem") then {PVDZE_EvacChopperFields = PVDZE_EvacChopperFields - [_field];};
+		publicVariable "PVDZE_EvacChopperFields";
 	};
+	"PVDZE_EvacChopperFieldsUpdate" addPublicVariableEventHandler {(_this select 1) call ON_fnc_evacChopperFieldsUpdate};
 	```
   
-13. open ***dayz_server\init\server_functions.sqf***
+12. open ***dayz_server\init\server_functions.sqf***
 
 	Find this line:
 	
@@ -291,11 +336,11 @@ Note: all of the files that need to be modified are included in this repository 
 	server_callEvacChopper = compile preprocessFileLineNumbers "\z\addons\dayz_server\compile\server_callEvacChopper.sqf";
 	```
 	
-14. Copy the file ***dayz_server\compile\server_callEvacChopper.sqf*** to the same directory in your server folder.
+13. Copy the file ***dayz_server\compile\server_callEvacChopper.sqf*** to the compile in your server folder.
 
-15. Repack you server PBO.
+14. Repack you server PBO.
 
-16. A complete set of the necessary BattlEye files have been provided in the BattlEye folder. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
+15. A complete set of the necessary BattlEye files have been provided in the BattlEye folder. If you have a fresh server or prefer to diffmerge then you can use these files. Otherwise follow the instructions below.
 
 Note: These are to be used with the stock BattlEye filters that come with the 1.0.6.2 server files. If you are using a different set of filters then the numbers will not line up.
 
