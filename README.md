@@ -388,38 +388,6 @@ Note: I have not tested the BattlEye filter exceptions below in Epoch 1.0.7.1.
   	```sqf
 	!="FNC_GetPos;\n_canceled = false;\n\n\nfor \"_p\" from 1 to 5 do\n{\nsystemChat(format [\"Evac-Chopper get called in %1s - Move to cancel!\""
 	```
-	
-***Deploy Anything Option***
-
-1. If you want to use right click actions in deploy anything to call the evac chopper instead of the built in self-actions, then   find this variable in your custom variables.sqf
-  
-   Find this variable
-  
-  	```sqf
-	evac_chopperUseClickActions = false;
-	```
-   
-   and change to:
-  
-  	```sqf
-	evac_chopperUseClickActions = true;
-	```
-	
-   Open your mission file and find file ***overwrites\click_actions\config.sqf***.
-  
-   Add this to the bottom of the DZE_CLICK_ACTIONS array:
-   
-  	```sqf
-	["ItemGPS","Call Evac Chopper","execVM 'scripts\JAEM\callEvacChopper.sqf';","true"]
-	```
-	
-   Note: you can tie the right click action to any toolbelt item. I just chose ItemGPS as default. Make sure you put a comma on the one before the last.
-  
-   I had to add this exception to the end of line 32 in scripts.txt
-  
-  	```sqf
-	!="execVM 'scripts\\JAEM\\callEvacChopper.sqf';"
-	```
 
    You are finished with the install.
 	
