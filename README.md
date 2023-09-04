@@ -15,7 +15,7 @@ I have upgraded this version to be ZSC and Deploy Anything compatible.
 
 ### Installation Instructions
 
-1. Click ***[<> Code or Download](https://github.com/worldwidesorrow/Just-Another-Evac-Chopper-Mod/archive/refs/heads/master.zip)*** the green button on the right side of the Github page.
+1. ***[Download](https://github.com/worldwidesorrow/Just-Another-Evac-Chopper-Mod/archive/refs/heads/master.zip)*** or click the green button on the right side of the Github page and select Download ZIP.
 
 	> Recommended PBO tool for all "pack", "repack", or "unpack" steps: ***[PBO Manager](https://pbo-manager-v-1-4.software.informer.com/1.4b/)***
   
