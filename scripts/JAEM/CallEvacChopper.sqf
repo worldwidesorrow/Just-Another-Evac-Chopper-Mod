@@ -8,21 +8,24 @@
 /* Last update: 05-30-2021           		*/
 /*------------------------------------------*/
 
+if(evac_chopperInProgress) exitWith {format["%1 %2",localize "STR_CL_EC_NAME", localize "STR_EPOCH_PLAYER_96"] call dayz_rollingMessages;};
+evac_chopperInProgress = true;
+
+player removeAction s_player_evacCall;
+s_player_evacCall = 1;
+
 local _name = localize "STR_CL_EC_NAME";
 local _cnt = 5;
 local _locationPlayer = [player] call FNC_GetPos;
-
-if (!evac_chopperUseClickActions) then {player removeAction s_player_evacCall; s_player_evacCall = -1;};
-
-if(evac_chopperInProgress) exitWith {format["%1 %2",_name, localize "STR_EPOCH_PLAYER_96"] call dayz_rollingMessages;};
-evac_chopperInProgress = true;
+local _clickAction = _this select 3; // boolean
 
 if (!playerHasEvacField) exitWith {
 	format[localize "STR_EPOCH_PLAYER_118",_name] call dayz_rollingMessages;
 	evac_chopperInProgress = false;
+	s_player_evacCall = -1;
 };
 
-if (evac_chopperUseClickActions && ((player distance playersEvacField) < evac_chopperMinDistance)) exitWith {
+if (_clickAction && ((player distance playersEvacField) < evac_chopperMinDistance)) exitWith {
 	format[localize "STR_CL_EC_MINIMUM_DISTANCE",evac_chopperMinDistance,_name] call dayz_rollingMessages;
 	evac_chopperInProgress = false;
 };
@@ -32,34 +35,41 @@ _NearChoppers = playersEvacField nearEntities ["Helicopter", 10];
 if (count _NearChoppers == 0) exitWith {
 	format[localize "STR_EPOCH_PLAYER_118",_name] call dayz_rollingMessages;
 	evac_chopperInProgress = false;
+	s_player_evacCall = -1;
 };
 
 local _evacChopper = _NearChoppers select 0;
 
 /* 5 seconds timeout to cancel a call on accident */
-for "_p" from 1 to _cnt do
-{
+for "_p" from 1 to _cnt do {
 	systemChat format [localize "STR_CL_EC_COUNTDOWN",_name,_cnt];
 	if (player distance _locationPlayer > 0.2) exitWith {
 		evac_chopperInProgress = false;
+		s_player_evacCall = -1;
 	};
 	uiSleep 1;
 	_cnt = _cnt - 1;
 };
 
+if (!evac_chopperInProgress) exitWith {};
+
 // Fuel check
 if ((fuel _evacChopper) < 0.2) exitWith {
 	localize "STR_CL_EC_UNABLETOEVAC" call dayz_rollingMessages;
 	evac_chopperInProgress = false;
+	s_player_evacCall = -1;
 };
 
-// Damage check
-{			
-	if ((([_evacChopper,_x] call object_getHit) select 0) >= .9 && ((["Engine",_x,false] call fnc_inString) || (["HRotor",_x,false] call fnc_inString))) exitWith {
+// Damage check - some helicopters don't have all of the hit points in the array so an isNil check is necessary.
+{
+	local _selection = getText (configFile >> "CfgVehicles" >> (typeOf _evacChopper) >> "HitPoints" >> _x >> "name");
+	local _dam = _evacChopper getHit _selection;
+	if (!(isNil "_dam") && {_dam >= .9}) exitWith {
 		localize "STR_CL_EC_UNABLETOEVAC" call dayz_rollingMessages;
 		evac_chopperInProgress = false;
+		s_player_evacCall = -1;
 	};
-} count (_evacChopper call vehicle_getHitpoints);
+} forEach ["HitEngine","HitHRotor","HitVRotor"];
 
 if (!evac_chopperInProgress) exitWith {};
 
@@ -108,7 +118,7 @@ EvacChopperFlightStatus = {
 			
 			format[localize "STR_BLD_UNLOCKED",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
 			
-			if (!evac_chopperUseClickActions) then {s_player_evacCall = -1;};
+			s_player_evacCall = -1;
 			evac_chopperInProgress = false;	
 		};
 	};
@@ -121,6 +131,8 @@ EvacChopperFlightStatus = {
 			toUpper localize "STR_CL_EC_NAME",
 			localize "STR_CL_EC_CRASHED"
 		];
+		s_player_evacCall = -1;
+		evac_chopperInProgress = false;
 	};
 	
 	if (_flightStatus == "Disabled") exitWith {
@@ -131,7 +143,9 @@ EvacChopperFlightStatus = {
 			localize "STR_CL_EC_NAME",
 			localize "STR_CL_EC_DISABLED"
 		];
-		if (evac_ChopperDisabledMarker) then {_evacChopper spawn DisabledChopperMarker;};
+		if (evac_chopperDisabledMarker) then {_evacChopper spawn DisabledChopperMarker;};
+		s_player_evacCall = -1;
+		evac_chopperInProgress = false;
 	};
 	
 	hintSilent parseText format ["
@@ -147,12 +161,12 @@ EvacChopperFlightStatus = {
 DisabledChopperMarker = {
 	local _evacChopper = _this;
 	local _recovered = false;
-	local _chopperPos = getPos _evacChopper;
+	local _chopperPos = getPosATL _evacChopper;
 	local _marker = createMarkerLocal ["EvacChopper",_chopperPos];
 	_marker setMarkerColorLocal "ColorBlack";
 	_marker setMarkerTypeLocal "mil_objective";
 	_marker setMarkerTextLocal (localize "STR_CL_EC_NAME");
-	format["STR_CL_EC_MARKER",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
+	format["STR_CL_EC_MARKER",localize "STR_CL_EC_NAME"] call dayz_rollingMessages; // localize the first part?///////////////////////
 	
 	while {!_recovered} do {
 		if ((player distance _chopperPos) < 10) then {
@@ -163,7 +177,6 @@ DisabledChopperMarker = {
 			publicVariable "PVDZE_veh_Lock";
 			
 			format[localize "STR_BLD_UNLOCKED",localize "STR_CL_EC_NAME"] call dayz_rollingMessages;
-			evac_chopperInProgress = false;	
 		};
 	uiSleep 3;
 	};

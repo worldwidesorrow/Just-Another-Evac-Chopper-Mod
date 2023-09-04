@@ -6,38 +6,39 @@
 /* Last update: 05-30-2021           		*/
 /*------------------------------------------*/
 
-private ["_owner","_chopper","_pilot","_group","_returned","_dir","_worldSpace","_disabled","_pos","_startPos","_player","_clientKey","_playerUID","_exitReason","_routeFinished","_landingZone","_evacZonePos","_distance","_wp","_wp2","_flyHeight","_evacZoneReached"];
+local _chopper = _this select 0;
+local _worldSpace = _this select 1;
+local _startPos = _worldSpace select 0;
+local _dir = _worldSpace select 1;
+local _player = _this select 2;
+local _clientKey = _this select 3;
+local _playerUID = getPlayerUID _player;
+local _pos = getPosATL _player;
+local _owner = owner _player;
 
-_chopper = _this select 0;
-_worldSpace = _this select 1;
-_startPos = _worldSpace select 0;
-_dir = _worldSpace select 1;
-_player = _this select 2;
-_clientKey = _this select 3;
-_playerUID = getPlayerUID _player;
-_pos = [_player] call FNC_GetPos;
-_owner = owner _player;
-
-_exitReason = [_this,"Call_chopper",_pos,_clientKey,_playerUID,_player] call server_verifySender;
+local _exitReason = [_this,"Call_chopper",_pos,_clientKey,_playerUID,_player] call server_verifySender;
 if (_exitReason != "") exitWith {diag_log _exitReason};
 
-_evacZoneReached = false;
-_routeFinished = false;
-_disabled = false;
+local _evacZoneReached = false;
+local _routeFinished = false;
+local _disabled = false;
+local _landingZone = objNull;
+local _distance = 0;
+local _flyHeight = 0;
 
 if (evac_chopperZoneMarker == 1) then {
-	_landingZone = "SmokeshellGreen" createVehicle ([_player] call FNC_GetPos);
-	_landingZone setPosATL ([_player] call FNC_GetPos);
+	_landingZone = "SmokeshellGreen" createVehicle _pos;
+	_landingZone setPosATL _pos;
 } else {
-	_landingZone = "HeliHRescue" createVehicle ([_player] call FNC_GetPos);
+	_landingZone = "HeliHRescue" createVehicle _pos;
 	_landingZone setDir (getDir _player);
-	_landingZone setPosATL ([_player] call FNC_GetPos);
+	_landingZone setPosATL _pos;
 };
 
-_evacZonePos = [_landingZone] call FNC_GetPos;
+local _evacPos = getPosATL _landingZone;
 
 _group = createGroup EAST;
-_pilot = _group createUnit ["USMC_Soldier_pilot", _startPos, [], 0,"LIEUTENANT"];
+local _pilot = _group createUnit ["USMC_Soldier_pilot", _startPos, [], 0,"LIEUTENANT"];
 _pilot allowDamage false;
 _pilot assignAsDriver _chopper;
 _pilot moveInDriver _chopper;
@@ -48,7 +49,7 @@ _chopper setVehicleLock "LOCKED";
 _chopper engineOn true;
 _chopper flyInHeight 75;
 
-_wp = _group addWaypoint [_evacZonePos, 0];
+local _wp = _group addWaypoint [_evacPos, 0];
 _wp setWaypointBehaviour "CARELESS";
 _wp setWaypointType "MOVE";
 _wp setWaypointCompletionRadius 5;
@@ -57,13 +58,13 @@ _wp setWaypointSpeed  "FULL" ;
 while {alive _player && {!_routeFinished} && {alive _chopper} && {!_disabled}} do {
 	uiSleep 0.5;
 	
-	if ((_chopper distance _evacZonePos) < 150 && !_evacZoneReached) then {
+	if ((_chopper distance _evacPos) < 150 && !_evacZoneReached) then {
 		_evacZoneReached = true; 
 		_chopper land 'LAND';
 	};
 	
 	if (!_evacZoneReached) then {
-		_distance = format["%1m", round (_chopper distance _evacZonePos)];
+		_distance = format["%1m", round (_chopper distance _evacPos)];
 		_flyHeight = (round (([_chopper] call FNC_GetPos) select 2));
 		
 		if ({alive _x} count crew _chopper == 0) exitWith {_disabled = true;};
@@ -81,7 +82,7 @@ while {alive _player && {!_routeFinished} && {alive _chopper} && {!_disabled}} d
 			_owner publicVariableClient "EvacChopperClient";
 		};
 		
-		_distance = format["%1m", round (_chopper distance _evacZonePos)];
+		_distance = format["%1m", round (_chopper distance _evacPos)];
 		_flyHeight = (round (([_chopper] call FNC_GetPos) select 2));
 		
 		EvacChopperClient = [_flyHeight, speed _chopper, _distance, "InProgress"];
@@ -92,33 +93,42 @@ while {alive _player && {!_routeFinished} && {alive _chopper} && {!_disabled}} d
 if (_disabled) exitWith {
 	deleteVehicle _landingZone;
 	deleteVehicle _pilot;
-	waitUntil{uiSleep 1; count units group _pilot == 0};
-	deleteGroup _group;
 	
 	EvacChopperClient = [0,0,0,"Disabled",_chopper];
 	_owner publicVariableClient "EvacChopperClient";
+	
+	while {(count (wayPoints _group)) > 0} do {
+		deleteWaypoint ((wayPoints _group) select 0);
+	};
+	
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
 };
 
 if (!alive _chopper) exitWith {
 	deleteVehicle _landingZone;
 	deleteVehicle _pilot;
-	waitUntil{uiSleep 1; count units group _pilot == 0};
-	deleteGroup _group;
 	
 	EvacChopperClient = [0,0,0,"Crashed"];
 	_owner publicVariableClient "EvacChopperClient";
+	
+	while {(count (wayPoints _group)) > 0} do {
+		deleteWaypoint ((wayPoints _group) select 0);
+	};
+	
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
 };
 
 if (!alive _player) exitWith {
 	deleteVehicle _landingZone;
-	_returned = false;
+	local _returned = false;
 	
-	while {(count (wayPoints _group)) > 0} do
-	 {
-	  deleteWaypoint ((wayPoints _group) select 0);
+	while {(count (wayPoints _group)) > 0} do {
+		deleteWaypoint ((wayPoints _group) select 0);
 	 };
 	 
-	_wp2 = _group addWaypoint [_startPos, 0];
+	local _wp2 = _group addWaypoint [_startPos, 0];
 	_wp2 setWaypointType "MOVE";
 	_wp2 setWaypointCompletionRadius 5;
 	_wp2 setWaypointSpeed "FULL";
@@ -137,13 +147,23 @@ if (!alive _player) exitWith {
 	
 	moveOut _pilot;
 	deleteVehicle _pilot;
-	waitUntil{uiSleep 1; count units group _pilot == 0};
-	deleteGroup _group;
 	_chopper setDir _dir;
 	_chopper setPosATL _startPos;
+	
+	while {(count (wayPoints _group)) > 0} do {
+		deleteWaypoint ((wayPoints _group) select 0);
+	};
+	
+	waitUntil{uiSleep 1; count units group _pilot == 0};
+	deleteGroup _group;
 };
 
 deleteVehicle _landingZone;
 deleteVehicle _pilot;
+
+while {(count (wayPoints _group)) > 0} do {
+	deleteWaypoint ((wayPoints _group) select 0);
+};
+
 waitUntil{uiSleep 1; count units group _pilot == 0};
 deleteGroup _group;

@@ -8,16 +8,15 @@
 /* Last update: 05-30-2021           		*/
 /*------------------------------------------*/
 
-if (!DZE_permanentPlot) exitWith {diag_log "EVAC-CHOPPER: You have to have DZE_permanentPlot enabled.";};
-
 if (evac_chopperInProgress) exitWith {format["%1 %2",_name, localize "STR_EPOCH_PLAYER_96"] call dayz_rollingMessages;};
 evac_chopperInProgress = true;
 
-{player removeAction _x} count s_player_evacChopper;s_player_evacChopper = [];
-s_player_evacChopper_ctrl = 1;
+player removeAction s_player_evacSet;
+s_player_evacSet = 1;
 
 if (player getVariable["combattimeout",0] >= diag_tickTime) exitWith {
-	evac_chopperInProgress = false; 
+	evac_chopperInProgress = false;
+	s_player_evacSet = -1; 
 	localize "str_epoch_player_43" call dayz_rollingMessages;
 };
 
@@ -26,27 +25,31 @@ local _veh = _this select 3;
 local _pos = [_veh] call FNC_GetPos;
 local _dir = getDir _veh;
 
-if (!DZE_BuildOnRoads) then {
-	if (isOnRoad _pos) exitWith {localize "STR_EPOCH_BUILD_FAIL_ROAD" call dayz_rollingMessages;};
+if (!DZE_BuildOnRoads && {isOnRoad _pos}) exitWith {
+	localize "STR_EPOCH_BUILD_FAIL_ROAD" call dayz_rollingMessages;
 	evac_chopperInProgress = false;
+	s_player_evacSet = -1;
 };
 
 if (playerHasEvacField) exitWith {
 	evac_chopperInProgress = false;
+	s_player_evacSet = -1;
 	format[localize "STR_CL_EC_EXISTS",_name] call dayz_rollingMessages;
 };
 
 if ((_pos) select 2 >= 3) exitWith {
 	evac_chopperInProgress = false;
+	s_player_evacSet = -1;
 	format[localize "STR_EPOCH_PLAYER_168",1] call dayz_rollingMessages;
 };
 
 local _amount = [(evac_chopperPrice * 10000), evac_chopperPriceZSC] select Z_SingleCurrency;
 local _enoughMoney = false;
 local _moneyInfo = [false,[],[],[],0];
-local _wealth = player getVariable [(["cashMoney","globalMoney"] select Z_persistentMoney),0];
+local _wealth = 0;
 
 if (Z_SingleCurrency) then {
+	_wealth = player getVariable [(["cashMoney","globalMoney"] select Z_persistentMoney),0];
 	_enoughMoney = (_wealth >= _amount);
 } else {
 	Z_Selling = false;
@@ -56,7 +59,11 @@ if (Z_SingleCurrency) then {
 };
 
 local _success = [([player,_amount,_moneyInfo,true,0] call Z_payDefault),true] select Z_SingleCurrency;
-if (!_success && _enoughMoney) exitWith {systemChat localize "STR_EPOCH_TRADE_GEAR_AND_BAG_FULL"; evac_chopperInProgress = false;};
+if (!_success && _enoughMoney) exitWith {
+	systemChat localize "STR_EPOCH_TRADE_GEAR_AND_BAG_FULL";
+	evac_chopperInProgress = false;
+	s_player_evacSet = -1;
+};
 
 if (_enoughMoney) then {
 	_success = [true,(_amount <= _wealth)] select Z_SingleCurrency;
@@ -134,4 +141,4 @@ if (_enoughMoney) then {
 };
 
 evac_chopperInProgress = false;
-s_player_evacChopper_ctrl = -1;
+s_player_evacSet = -1;
